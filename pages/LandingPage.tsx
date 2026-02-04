@@ -203,7 +203,7 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto flex justify-center max-w-7xl">
           <div className="w-full max-w-md">
             <div className="bg-white p-8 md:p-12 rounded-[3.5rem] md:rounded-[4rem] shadow-[0_32px_0_rgba(38,159,120,0.1)] border-4 border-[#269f78] relative overflow-hidden">
-              <h4 className="text-3xl font-black text-[#269f78] mb-10 uppercase tracking-tighter italic leading-none text-center">Lista Prioritária</h4>
+              <h4 className="text-3xl font-black text-[#269f78] mb-10 uppercase tracking-tighter italic leading-none text-center">Lista para pré-venda</h4>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-1">

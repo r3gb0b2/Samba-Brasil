@@ -17,8 +17,7 @@ const Header: React.FC = () => {
         
         <nav className="hidden md:flex gap-8 text-white font-semibold items-center">
           <a href="#" className="hover:text-yellow-400 transition-colors">Início</a>
-          <a href="#galeria" className="hover:text-yellow-400 transition-colors">Galeria</a>
-          <a href="#admin" onClick={(e) => { e.preventDefault(); window.location.hash = '/admin'; }} className="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-sm hover:bg-yellow-500 transition-all">Admin</a>
+          <a href="#admin" onClick={(e) => { e.preventDefault(); window.location.hash = '/admin'; }} className="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-sm hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-400/20">Painel Administrativo</a>
         </nav>
       </div>
     </header>

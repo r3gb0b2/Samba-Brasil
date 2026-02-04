@@ -1,6 +1,5 @@
 
-import { Lead, Photo } from '../types';
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   getFirestore, 
   collection, 
@@ -13,9 +12,9 @@ import {
   doc, 
   updateDoc 
 } from 'firebase/firestore';
+import { Lead, Photo } from '../types';
 
 // Configuração do Firebase
-// Nota: Em um ambiente de produção real, essas chaves viriam de variáveis de ambiente.
 const firebaseConfig = {
   apiKey: "AIzaSyDsi6VpfhLQW8UWgAp5c4TRV7vqOkDyauU",
   authDomain: "stingressos-e0a5f.firebaseapp.com",
@@ -26,16 +25,14 @@ const firebaseConfig = {
   measurementId: "G-EEWHM37VXR"
 };
 
-// Inicializa o Firebase
-const app = initializeApp(firebaseConfig);
+// Inicializa o Firebase garantindo que não existam múltiplas instâncias
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
-// Nomes das coleções
 const LEADS_COLLECTION = 'leads';
 const PHOTOS_COLLECTION = 'photos';
 
 export const dbService = {
-  // --- LEADS ---
   async getLeads(): Promise<Lead[]> {
     try {
       const q = query(collection(db, LEADS_COLLECTION), orderBy('createdAt', 'desc'));
@@ -45,14 +42,13 @@ export const dbService = {
         ...doc.data()
       })) as Lead[];
     } catch (error) {
-      console.error("Erro ao buscar leads:", error);
+      console.error("Erro ao buscar leads no Firestore:", error);
       return [];
     }
   },
 
   async addLead(lead: Omit<Lead, 'id' | 'createdAt'>): Promise<{ success: boolean; message: string }> {
     try {
-      // Verificação de duplicidade por e-mail no Firestore
       const q = query(collection(db, LEADS_COLLECTION), where("email", "==", lead.email.toLowerCase()));
       const querySnapshot = await getDocs(q);
       
@@ -69,11 +65,10 @@ export const dbService = {
       return { success: true, message: 'Cadastro realizado com sucesso! Prepare seu samba.' };
     } catch (error) {
       console.error("Erro ao adicionar lead:", error);
-      return { success: false, message: 'Erro ao conectar com o servidor. Tente novamente.' };
+      return { success: false, message: 'Erro ao conectar com o banco de dados.' };
     }
   },
 
-  // --- PHOTOS ---
   async getPhotos(): Promise<Photo[]> {
     try {
       const querySnapshot = await getDocs(collection(db, PHOTOS_COLLECTION));
@@ -82,7 +77,6 @@ export const dbService = {
         ...doc.data()
       })) as Photo[];
 
-      // Se a coleção estiver vazia (primeiro acesso), poderíamos popular com iniciais
       if (photos.length === 0) {
         return [
           { id: 'default1', url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800', title: 'Samba 1', active: true },
@@ -119,12 +113,12 @@ export const dbService = {
 
   async togglePhotoStatus(id: string): Promise<void> {
     try {
-      const photos = await this.getPhotos();
-      const photo = photos.find(p => p.id === id);
-      if (photo) {
-        const photoRef = doc(db, PHOTOS_COLLECTION, id);
+      const photoRef = doc(db, PHOTOS_COLLECTION, id);
+      const querySnapshot = await getDocs(collection(db, PHOTOS_COLLECTION));
+      const photoDoc = querySnapshot.docs.find(d => d.id === id);
+      if (photoDoc) {
         await updateDoc(photoRef, {
-          active: !photo.active
+          active: !photoDoc.data().active
         });
       }
     } catch (error) {

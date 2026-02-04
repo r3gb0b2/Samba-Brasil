@@ -43,6 +43,7 @@ export const dbService = {
         const data = docSnap.data() as SiteSettings;
         return {
           ...data,
+          logoUrl: data.logoUrl || 'https://raw.githubusercontent.com/ai-images/placeholders/main/samba-brasil-logo.png',
           eventDescription: data.eventDescription || 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
           eventDateDisplay: data.eventDateDisplay || '08 de Agosto',
           eventDayBanner: data.eventDayBanner || '08',
@@ -56,6 +57,7 @@ export const dbService = {
         };
       }
       return {
+        logoUrl: 'https://raw.githubusercontent.com/ai-images/placeholders/main/samba-brasil-logo.png',
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
         eventName: 'Samba Brasil Fortaleza 2026',
         eventDescription: 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
@@ -71,6 +73,7 @@ export const dbService = {
       };
     } catch (error) {
       return {
+        logoUrl: '',
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
         eventName: 'Samba Brasil Fortaleza 2026',
         eventDescription: 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',

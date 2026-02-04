@@ -132,10 +132,17 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-6 md:px-12 lg:px-16 flex flex-col items-center text-center">
           <div className="w-full max-w-6xl relative">
              <div className="flex justify-center mb-8">
-               <div className="text-center relative">
-                 <h2 className="text-4xl md:text-7xl font-black text-[#269f78] italic uppercase leading-none tracking-tighter">
-                   SAMBA <span className="text-[#f37f3a]">BRASIL</span>
-                 </h2>
+               <div className="text-center relative flex flex-col items-center">
+                 <div className="max-w-[320px] md:max-w-[500px] mb-4">
+                    {settings?.logoUrl ? (
+                      <img src={settings.logoUrl} alt="Samba Brasil" className="w-full h-auto" />
+                    ) : (
+                      <h2 className="text-4xl md:text-7xl font-black text-[#269f78] italic uppercase leading-none tracking-tighter">
+                        SAMBA <span className="text-[#f37f3a]">BRASIL</span>
+                      </h2>
+                    )}
+                 </div>
+                 
                  <div className="inline-block bg-[#f6c83e] text-[#269f78] px-6 py-2 rounded-full font-black text-xl md:text-3xl mt-4 rotate-[-2deg] shadow-lg border-2 border-white">
                    20 ANOS
                  </div>
@@ -285,11 +292,14 @@ const LandingPage: React.FC = () => {
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-12 mb-16">
-            <div className="text-center md:text-left">
-              <h2 className="text-5xl font-black italic tracking-tighter uppercase leading-none mb-2">
-                SAMBA <br/><span className="text-[#f6c83e]">BRASIL</span>
-              </h2>
-              <p className="text-white/80 font-bold uppercase tracking-widest text-[10px]">20 Anos • Desde 2006 em Fortaleza</p>
+            <div className="text-center md:text-left h-20 md:h-32 mb-6 md:mb-0">
+               {settings?.logoUrl ? (
+                 <img src={settings.logoUrl} alt="Samba Brasil Logo" className="h-full object-contain brightness-0 invert" />
+               ) : (
+                 <h2 className="text-5xl font-black italic tracking-tighter uppercase leading-none mb-2 text-white">
+                  SAMBA <br/><span className="text-[#f6c83e]">BRASIL</span>
+                </h2>
+               )}
             </div>
             
             <div className="flex flex-col items-center md:items-end gap-6">

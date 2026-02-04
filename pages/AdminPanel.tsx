@@ -38,6 +38,7 @@ const AdminPanel: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [settings, setSettings] = useState<SiteSettings>({ 
+    logoUrl: '',
     heroBannerUrl: '', 
     eventName: '',
     eventDescription: '',
@@ -61,6 +62,7 @@ const AdminPanel: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const loadData = async () => {
     const [allLeads, allPhotos, siteSettings] = await Promise.all([
@@ -131,6 +133,20 @@ const AdminPanel: React.FC = () => {
       setIsUploading(true);
       const compressedBase64 = await compressImage(file, 1920);
       setSettings(prev => ({ ...prev, heroBannerUrl: compressedBase64 }));
+    } catch (err) {
+      alert("Erro ao processar imagem.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploading(true);
+      const compressedBase64 = await compressImage(file, 800);
+      setSettings(prev => ({ ...prev, logoUrl: compressedBase64 }));
     } catch (err) {
       alert("Erro ao processar imagem.");
     } finally {
@@ -391,14 +407,29 @@ const AdminPanel: React.FC = () => {
                <div className="bg-white p-6 md:p-10 rounded-[3rem] shadow-sm border-4 border-white">
                  <form onSubmit={handleSaveSettings} className="space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Título do Evento</label>
-                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-black text-[#269f78] uppercase outline-none" value={settings.eventName} onChange={e => setSettings({...settings, eventName: e.target.value})} />
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Logo do Evento</label>
+                          <div className="w-full aspect-square max-w-[200px] rounded-2xl bg-[#f4f1e1] border-4 border-dashed border-gray-200 overflow-hidden relative group">
+                            {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10"><Loader2 className="animate-spin text-[#269f78]" /></div>}
+                            {settings.logoUrl ? <img src={settings.logoUrl} className="w-full h-full object-contain p-4" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 italic">Sem Logo</div>}
+                            <button type="button" onClick={() => logoInputRef.current?.click()} className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-black text-[10px] uppercase">Trocar Logo</button>
+                          </div>
+                          <input type="file" ref={logoInputRef} className="hidden" onChange={handleLogoUpload} />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Data para Exibição</label>
-                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.eventDateDisplay} onChange={e => setSettings({...settings, eventDateDisplay: e.target.value})} />
+                        
+                        <div className="space-y-8">
+                          <div className="space-y-2">
+                              <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Título do Evento</label>
+                              <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-black text-[#269f78] uppercase outline-none" value={settings.eventName} onChange={e => setSettings({...settings, eventName: e.target.value})} />
+                          </div>
+                          <div className="space-y-2">
+                              <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Data para Exibição</label>
+                              <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.eventDateDisplay} onChange={e => setSettings({...settings, eventDateDisplay: e.target.value})} />
+                          </div>
                         </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Dia (Banner)</label>
                             <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.eventDayBanner} onChange={e => setSettings({...settings, eventDayBanner: e.target.value})} />

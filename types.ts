@@ -16,6 +16,7 @@ export interface Photo {
 }
 
 export interface SiteSettings {
+  logoUrl: string;
   heroBannerUrl: string;
   eventName: string;
   eventDescription: string;

@@ -1,22 +1,32 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { dbService } from '../services/db';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('');
+
+  useEffect(() => {
+    dbService.getSettings().then(s => setLogoUrl(s.logoUrl));
+  }, []);
 
   return (
     <header className="absolute top-0 left-0 w-full z-50 py-6 px-4 md:px-12">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="bg-[#7db5d9] p-2 rounded-xl rotate-[-3deg] shadow-lg border-2 border-white">
-             <span className="text-white font-black text-2xl px-1">SB</span>
+        <div className="flex items-center gap-6">
+          <div className="h-12 md:h-16 flex items-center">
+             {logoUrl ? (
+               <img src={logoUrl} alt="Samba Brasil Logo" className="h-full object-contain" />
+             ) : (
+               <div className="bg-[#7db5d9] p-2 rounded-xl rotate-[-3deg] shadow-lg border-2 border-white">
+                 <span className="text-white font-black text-2xl px-1">SB</span>
+               </div>
+             )}
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-[#269f78] font-black text-xl leading-none tracking-tighter uppercase italic">
-              Samba Brasil
-            </h1>
-            <span className="text-[#f37f3a] text-[10px] font-bold uppercase tracking-widest">20 Anos • Fortaleza</span>
+          <div className="hidden md:flex flex-col">
+            <span className="text-[#f37f3a] text-[10px] font-black uppercase tracking-[0.3em] leading-none">20 Anos • Fortaleza</span>
+            <div className="w-full h-0.5 bg-[#269f78] mt-1 opacity-30"></div>
           </div>
         </div>
         

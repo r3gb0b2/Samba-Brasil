@@ -43,25 +43,46 @@ export const dbService = {
         const data = docSnap.data() as SiteSettings;
         return {
           ...data,
+          eventDescription: data.eventDescription || 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
+          eventDateDisplay: data.eventDateDisplay || '18 de Agosto',
+          eventDayBanner: data.eventDayBanner || '18',
+          eventMonthBanner: data.eventMonthBanner || 'AGOSTO',
           instagramUrl: data.instagramUrl || '#',
           facebookUrl: data.facebookUrl || '#',
-          tiktokUrl: data.tiktokUrl || '#'
+          tiktokUrl: data.tiktokUrl || '#',
+          facebookPixelId: data.facebookPixelId || '',
+          googleTagManagerId: data.googleTagManagerId || '',
+          customHeadScript: data.customHeadScript || ''
         };
       }
       return {
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
         eventName: 'Samba Brasil Fortaleza 2026',
+        eventDescription: 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
+        eventDateDisplay: '18 de Agosto',
+        eventDayBanner: '18',
+        eventMonthBanner: 'AGOSTO',
         instagramUrl: '#',
         facebookUrl: '#',
-        tiktokUrl: '#'
+        tiktokUrl: '#',
+        facebookPixelId: '',
+        googleTagManagerId: '',
+        customHeadScript: ''
       };
     } catch (error) {
       return {
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
         eventName: 'Samba Brasil Fortaleza 2026',
+        eventDescription: 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
+        eventDateDisplay: '18 de Agosto',
+        eventDayBanner: '18',
+        eventMonthBanner: 'AGOSTO',
         instagramUrl: '#',
         facebookUrl: '#',
-        tiktokUrl: '#'
+        tiktokUrl: '#',
+        facebookPixelId: '',
+        googleTagManagerId: '',
+        customHeadScript: ''
       };
     }
   },

@@ -22,19 +22,30 @@ import {
   ExternalLink,
   Instagram,
   Facebook,
-  Youtube
+  Youtube,
+  Type,
+  CalendarDays,
+  Target,
+  Code
 } from 'lucide-react';
 
 const AdminPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'leads' | 'photos' | 'settings'>('leads');
+  const [activeTab, setActiveTab] = useState<'leads' | 'photos' | 'settings' | 'marketing'>('leads');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [settings, setSettings] = useState<SiteSettings>({ 
     heroBannerUrl: '', 
     eventName: '',
+    eventDescription: '',
+    eventDateDisplay: '',
+    eventDayBanner: '',
+    eventMonthBanner: '',
     instagramUrl: '',
     facebookUrl: '',
-    tiktokUrl: ''
+    tiktokUrl: '',
+    facebookPixelId: '',
+    googleTagManagerId: '',
+    customHeadScript: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [newPhoto, setNewPhoto] = useState({ url: '', title: '' });
@@ -188,34 +199,6 @@ const AdminPanel: React.FC = () => {
     a.click();
   };
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-[#269f78] flex items-center justify-center p-4">
-        <form onSubmit={handleLogin} className="bg-[#f4f1e1] p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border-4 border-white">
-          <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 bg-[#f37f3a] rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-              <Users className="text-white w-10 h-10" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-black text-[#269f78] text-center mb-8 uppercase italic tracking-tighter leading-none">Acesso Admin<br/><span className="text-[#f37f3a] text-sm not-italic">D&E MUSIC</span></h2>
-          <div className="space-y-6">
-            <input 
-              type="password" 
-              autoFocus
-              className="w-full px-5 py-4 rounded-2xl border-2 border-transparent bg-white focus:border-[#f37f3a] outline-none transition-all font-mono text-center"
-              placeholder="Digite a Senha"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-            <button type="submit" className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-900">
-              ENTRAR NO PAINEL
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#f4f1e1] flex">
       {/* Sidebar Admin */}
@@ -223,7 +206,7 @@ const AdminPanel: React.FC = () => {
         <div className="p-10">
           <h1 className="text-2xl font-black uppercase italic tracking-tighter leading-tight">SAMBA <span className="text-[#f6c83e] block text-[10px] not-italic tracking-[0.3em] mt-1 opacity-80">ADMIN D&E MUSIC</span></h1>
         </div>
-        <nav className="flex-1 px-6 space-y-4">
+        <nav className="flex-1 px-6 space-y-4 overflow-y-auto pb-8">
           <button 
             onClick={() => window.location.hash = '/'} 
             className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-black text-[10px] uppercase tracking-widest transition-all mb-4 border border-white/20"
@@ -233,7 +216,8 @@ const AdminPanel: React.FC = () => {
           {[
             { id: 'leads', icon: Users, label: 'Inscritos' },
             { id: 'photos', icon: ImageIcon, label: 'Galeria' },
-            { id: 'settings', icon: Settings, label: 'Configurações' }
+            { id: 'settings', icon: Settings, label: 'Visual & Site' },
+            { id: 'marketing', icon: Target, label: 'Marketing & Meta' }
           ].map(item => (
             <button 
               key={item.id}
@@ -246,7 +230,7 @@ const AdminPanel: React.FC = () => {
         </nav>
         <div className="p-8 border-t border-white/10">
           <button onClick={handleLogout} className="w-full flex items-center gap-4 px-5 py-3 text-red-200 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest">
-            <LogOut className="w-4 h-4" /> Deslogar do Painel
+            <LogOut className="w-4 h-4" /> Deslogar
           </button>
         </div>
       </aside>
@@ -258,7 +242,7 @@ const AdminPanel: React.FC = () => {
               <div className="flex justify-between items-end">
                 <div>
                   <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Inscritos</h2>
-                  <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Relatório de leads captados</p>
+                  <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Base de dados para pré-venda</p>
                 </div>
                 <button onClick={exportLeads} className="bg-[#f37f3a] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#d86b2b] transition-all shadow-lg border-b-4 border-orange-800">
                   <Download className="w-4 h-4" /> Exportar Planilha
@@ -310,7 +294,7 @@ const AdminPanel: React.FC = () => {
               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Galeria de Fotos</h2>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border-2 border-white h-fit">
-                   <h3 className="text-sm font-black text-[#269f78] mb-6 uppercase tracking-widest flex items-center gap-2"><Plus className="w-4 h-4" /> Nova Mídia</h3>
+                   <h3 className="text-sm font-black text-[#269f78] mb-6 uppercase tracking-widest flex items-center gap-2"><Plus className="w-4 h-4" /> Adicionar Mídia</h3>
                    <div className="space-y-6">
                       <div className="relative group">
                         <div className="w-full aspect-[3/4] rounded-2xl border-4 border-dashed border-gray-100 flex flex-col items-center justify-center bg-gray-50 overflow-hidden">
@@ -319,15 +303,15 @@ const AdminPanel: React.FC = () => {
                         <input type="file" ref={fileInputRef} className="hidden" onChange={handlePhotoUpload} />
                         <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-4 w-full bg-[#7db5d9] text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest">Escolher Foto</button>
                       </div>
-                      <input type="text" placeholder="Título da Foto" className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 text-xs font-bold" value={newPhoto.title} onChange={e => setNewPhoto({...newPhoto, title: e.target.value})} />
-                      <button onClick={handleAddPhoto} className="w-full bg-[#269f78] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest border-b-4 border-green-900 shadow-xl">Publicar na Galeria</button>
+                      <input type="text" placeholder="Título Opcional" className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 text-xs font-bold" value={newPhoto.title} onChange={e => setNewPhoto({...newPhoto, title: e.target.value})} />
+                      <button onClick={handleAddPhoto} className="w-full bg-[#269f78] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest border-b-4 border-green-900 shadow-xl">Publicar Galeria</button>
                    </div>
                 </div>
                 <div className="lg:col-span-2 grid grid-cols-2 gap-6">
                   {photos.map(photo => (
                     <div key={photo.id} className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border-4 border-white aspect-[3/4]">
                       <img src={photo.url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                      <div className="absolute inset-0 bg-[#269f78]/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                      <div className="absolute inset-0 bg-[#269f78]/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
                          <button onClick={() => handleTogglePhoto(photo.id)} className="p-3 bg-white rounded-xl text-[#269f78]">{photo.active ? <Eye size={20} /> : <EyeOff size={20} />}</button>
                          <button onClick={() => handleDeletePhoto(photo.id)} className="p-3 bg-red-500 rounded-xl text-white"><Trash2 size={20} /></button>
                       </div>
@@ -340,34 +324,45 @@ const AdminPanel: React.FC = () => {
 
           {activeTab === 'settings' && (
             <div className="space-y-12 animate-in fade-in">
-               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Site & Redes</h2>
-               <div className="max-w-3xl bg-white p-10 rounded-[3rem] shadow-sm border-4 border-white">
+               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Identidade Visual</h2>
+               <div className="max-w-4xl bg-white p-10 rounded-[3rem] shadow-sm border-4 border-white">
                  <form onSubmit={handleSaveSettings} className="space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Título do Site</label>
-                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-black text-[#269f78] uppercase" value={settings.eventName} onChange={e => setSettings({...settings, eventName: e.target.value})} />
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Título do Evento</label>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-black text-[#269f78] uppercase outline-none" value={settings.eventName} onChange={e => setSettings({...settings, eventName: e.target.value})} />
                         </div>
                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Data para Exibição</label>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.eventDateDisplay} onChange={e => setSettings({...settings, eventDateDisplay: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Dia (Banner)</label>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.eventDayBanner} onChange={e => setSettings({...settings, eventDayBanner: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Mês (Banner)</label>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs uppercase" value={settings.eventMonthBanner} onChange={e => setSettings({...settings, eventMonthBanner: e.target.value})} />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Descrição do Evento</label>
+                        <textarea rows={4} className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-sm leading-relaxed outline-none" value={settings.eventDescription} onChange={e => setSettings({...settings, eventDescription: e.target.value})} />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="space-y-2">
                             <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Instagram (Link)</label>
-                            <div className="relative">
-                                <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 text-[#269f78] w-4 h-4" />
-                                <input type="text" className="w-full pl-12 pr-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" placeholder="https://instagram.com/..." value={settings.instagramUrl} onChange={e => setSettings({...settings, instagramUrl: e.target.value})} />
-                            </div>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.instagramUrl} onChange={e => setSettings({...settings, instagramUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Facebook (Link)</label>
-                            <div className="relative">
-                                <Facebook className="absolute left-4 top-1/2 -translate-y-1/2 text-[#269f78] w-4 h-4" />
-                                <input type="text" className="w-full pl-12 pr-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" placeholder="https://facebook.com/..." value={settings.facebookUrl} onChange={e => setSettings({...settings, facebookUrl: e.target.value})} />
-                            </div>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.facebookUrl} onChange={e => setSettings({...settings, facebookUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">TikTok/Youtube (Link)</label>
-                            <div className="relative">
-                                <Youtube className="absolute left-4 top-1/2 -translate-y-1/2 text-[#269f78] w-4 h-4" />
-                                <input type="text" className="w-full pl-12 pr-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" placeholder="https://tiktok.com/..." value={settings.tiktokUrl} onChange={e => setSettings({...settings, tiktokUrl: e.target.value})} />
-                            </div>
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Outra Rede (Link)</label>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.tiktokUrl} onChange={e => setSettings({...settings, tiktokUrl: e.target.value})} />
                         </div>
                     </div>
                     
@@ -375,16 +370,63 @@ const AdminPanel: React.FC = () => {
                       <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Banner Principal</label>
                       <div className="w-full aspect-[21/9] rounded-2xl bg-[#f4f1e1] border-4 border-dashed border-gray-200 overflow-hidden relative group">
                         {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10"><Loader2 className="animate-spin text-[#269f78]" /></div>}
-                        {settings.heroBannerUrl ? <img src={settings.heroBannerUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 italic">Nenhum banner</div>}
-                        <button type="button" onClick={() => bannerInputRef.current?.click()} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-[#269f78] px-6 py-3 rounded-xl font-black text-[10px] uppercase opacity-0 group-hover:opacity-100 transition-opacity">Trocar Banner</button>
+                        {settings.heroBannerUrl ? <img src={settings.heroBannerUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 italic">Sem banner</div>}
+                        <button type="button" onClick={() => bannerInputRef.current?.click()} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-[#269f78] px-6 py-3 rounded-xl font-black text-[10px] uppercase opacity-0 group-hover:opacity-100 transition-opacity">Substituir Imagem</button>
                       </div>
                       <input type="file" ref={bannerInputRef} className="hidden" onChange={handleBannerUpload} />
                     </div>
 
                     <button type="submit" disabled={isUploading || saveStatus === 'saving'} className="w-full bg-[#269f78] text-white py-6 rounded-2xl font-black uppercase tracking-widest border-b-8 border-[#1e7e5f] shadow-2xl active:translate-y-1 transition-all">
-                      {saveStatus === 'saving' ? "SALVANDO..." : "SALVAR TODAS AS ALTERAÇÕES"}
+                      {saveStatus === 'saving' ? "SALVANDO..." : "ATUALIZAR VISUAL"}
                     </button>
-                    {saveStatus === 'success' && <p className="text-center text-green-600 font-black text-[10px] uppercase animate-pulse">✓ Atualizado com sucesso!</p>}
+                    {saveStatus === 'success' && <p className="text-center text-green-600 font-black text-[10px] uppercase">✓ Site atualizado!</p>}
+                 </form>
+               </div>
+            </div>
+          )}
+
+          {activeTab === 'marketing' && (
+            <div className="space-y-12 animate-in fade-in">
+               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Marketing & Conversão</h2>
+               <div className="max-w-4xl bg-white p-10 rounded-[3rem] shadow-sm border-4 border-white">
+                 <form onSubmit={handleSaveSettings} className="space-y-8">
+                    <div className="bg-[#269f78]/5 p-6 rounded-3xl border border-[#269f78]/10">
+                      <h3 className="flex items-center gap-2 font-black text-[#269f78] uppercase text-xs mb-4"><Target className="w-4 h-4" /> Configuração Meta (Facebook/Instagram)</h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">ID do Pixel do Facebook</label>
+                          <input 
+                            type="text" 
+                            className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-mono text-xs outline-none" 
+                            placeholder="Ex: 123456789012345"
+                            value={settings.facebookPixelId} 
+                            onChange={e => setSettings({...settings, facebookPixelId: e.target.value})} 
+                          />
+                          <p className="text-[9px] text-gray-400 font-bold ml-2 italic">Cole apenas o número do ID. O evento de 'Lead' será disparado automaticamente em cada cadastro.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#f37f3a]/5 p-6 rounded-3xl border border-[#f37f3a]/10">
+                      <h3 className="flex items-center gap-2 font-black text-[#f37f3a] uppercase text-xs mb-4"><Code className="w-4 h-4" /> Scripts Customizados (Head)</h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-[#f37f3a] uppercase tracking-widest ml-2">Código Adicional (Google Analytics, GTM, etc.)</label>
+                          <textarea 
+                            rows={8} 
+                            className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-mono text-[10px] outline-none leading-relaxed" 
+                            placeholder="<script> ... </script>"
+                            value={settings.customHeadScript} 
+                            onChange={e => setSettings({...settings, customHeadScript: e.target.value})} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="submit" disabled={saveStatus === 'saving'} className="w-full bg-[#f37f3a] text-white py-6 rounded-2xl font-black uppercase tracking-widest border-b-8 border-orange-800 shadow-2xl active:translate-y-1 transition-all">
+                      {saveStatus === 'saving' ? "SALVANDO..." : "SALVAR CONFIGURAÇÕES DE TRACKING"}
+                    </button>
+                    {saveStatus === 'success' && <p className="text-center text-green-600 font-black text-[10px] uppercase animate-pulse">✓ Rastreamento configurado!</p>}
                  </form>
                </div>
             </div>

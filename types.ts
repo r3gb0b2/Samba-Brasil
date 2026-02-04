@@ -17,9 +17,17 @@ export interface Photo {
 export interface SiteSettings {
   heroBannerUrl: string;
   eventName: string;
+  eventDescription: string;
+  eventDateDisplay: string;
+  eventMonthBanner: string;
+  eventDayBanner: string;
   instagramUrl?: string;
   facebookUrl?: string;
   tiktokUrl?: string;
+  // Campos de Marketing/Meta
+  facebookPixelId?: string;
+  googleTagManagerId?: string;
+  customHeadScript?: string;
 }
 
 export interface AdminStats {

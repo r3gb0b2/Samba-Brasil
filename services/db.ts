@@ -5,6 +5,7 @@ import {
   collection, 
   addDoc, 
   getDocs, 
+  getDoc,
   query, 
   where, 
   orderBy, 
@@ -114,11 +115,10 @@ export const dbService = {
   async togglePhotoStatus(id: string): Promise<void> {
     try {
       const photoRef = doc(db, PHOTOS_COLLECTION, id);
-      const querySnapshot = await getDocs(collection(db, PHOTOS_COLLECTION));
-      const photoDoc = querySnapshot.docs.find(d => d.id === id);
-      if (photoDoc) {
+      const photoSnap = await getDoc(photoRef);
+      if (photoSnap.exists()) {
         await updateDoc(photoRef, {
-          active: !photoDoc.data().active
+          active: !photoSnap.data().active
         });
       }
     } catch (error) {

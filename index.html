@@ -4,18 +4,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Samba Brasil - O Maior Evento de Samba do País</title>
+    <title>Samba Brasil Fortaleza 2026 - 20 Anos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --samba-sand: #f4f1e1;
+        --samba-orange: #f37f3a;
+        --samba-green: #269f78;
+        --samba-blue: #7db5d9;
+        --samba-yellow: #f6c83e;
+      }
       body {
         font-family: 'Montserrat', sans-serif;
-        margin: 0;
-        padding: 0;
+        background-color: var(--samba-sand);
+        position: relative;
+        overflow-x: hidden;
       }
-      .font-poppins {
-        font-family: 'Poppins', sans-serif;
+      /* Efeito de grão/textura de papel */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0.05;
+        z-index: 9999;
+        pointer-events: none;
+        background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
       }
+      .font-black { font-weight: 900; }
       @keyframes scroll {
         0% { transform: translateX(0); }
         100% { transform: translateX(-50%); }
@@ -23,10 +39,11 @@
       .animate-scroll {
         display: flex;
         width: max-content;
-        animation: scroll 30s linear infinite;
+        animation: scroll 40s linear infinite;
       }
-      .animate-scroll:hover {
-        animation-play-state: paused;
+      .perspective-text {
+        transform: rotate(-2deg);
+        display: inline-block;
       }
     </style>
     <script type="importmap">
@@ -47,7 +64,7 @@
 </script>
     <script type="module" src="./index.tsx"></script>
   </head>
-  <body class="bg-gray-50">
+  <body>
     <div id="root"></div>
   </body>
 </html>

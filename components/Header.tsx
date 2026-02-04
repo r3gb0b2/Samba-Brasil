@@ -3,21 +3,28 @@ import React from 'react';
 
 const Header: React.FC = () => {
   return (
-    <header className="absolute top-0 left-0 w-full z-50 py-6 px-4 sm:px-8 bg-gradient-to-b from-black/50 to-transparent">
+    <header className="absolute top-0 left-0 w-full z-50 py-6 px-4 md:px-12">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
-            <span className="text-blue-900 font-bold text-xl">S</span>
+        <div className="flex items-center gap-4">
+          <div className="bg-[#7db5d9] p-2 rounded-xl rotate-[-3deg] shadow-lg border-2 border-white">
+             <span className="text-white font-black text-2xl px-1">SB</span>
           </div>
-          <h1 className="text-white font-extrabold text-lg sm:text-2xl tracking-tighter uppercase leading-none">
-            Samba <span className="text-yellow-400">Brasil</span>
-            <span className="block text-[10px] sm:text-xs font-normal tracking-widest text-white/80">Fortaleza 2026</span>
-          </h1>
+          <div className="flex flex-col">
+            <h1 className="text-[#269f78] font-black text-xl leading-none tracking-tighter uppercase italic">
+              Samba Brasil
+            </h1>
+            <span className="text-[#f37f3a] text-[10px] font-bold uppercase tracking-widest">20 Anos • Fortaleza</span>
+          </div>
         </div>
         
-        <nav className="hidden md:flex gap-8 text-white font-semibold items-center">
-          <a href="#" className="hover:text-yellow-400 transition-colors">Início</a>
-          <a href="#admin" onClick={(e) => { e.preventDefault(); window.location.hash = '/admin'; }} className="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-sm hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-400/20">Painel Administrativo</a>
+        <nav className="flex gap-4">
+          <a 
+            href="#admin" 
+            onClick={(e) => { e.preventDefault(); window.location.hash = '/admin'; }} 
+            className="bg-[#269f78] hover:bg-[#1e7e5f] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-1"
+          >
+            Painel Admin
+          </a>
         </nav>
       </div>
     </header>

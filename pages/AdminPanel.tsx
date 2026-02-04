@@ -47,11 +47,8 @@ const AdminPanel: React.FC = () => {
   };
 
   useEffect(() => {
-    // Checar persistência de login
     const session = localStorage.getItem('samba_admin_session');
-    if (session === 'active') {
-      setIsLoggedIn(true);
-    }
+    if (session === 'active') setIsLoggedIn(true);
   }, []);
 
   useEffect(() => {
@@ -86,7 +83,6 @@ const AdminPanel: React.FC = () => {
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     try {
       setIsUploading(true);
       const base64 = await fileToBase64(file);
@@ -101,7 +97,6 @@ const AdminPanel: React.FC = () => {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     try {
       setIsUploading(true);
       const base64 = await fileToBase64(file);
@@ -122,17 +117,14 @@ const AdminPanel: React.FC = () => {
 
   const handleAddPhoto = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPhoto.url || !newPhoto.title) {
-      alert("Por favor, selecione uma foto e dê um título.");
-      return;
-    }
-    await dbService.addPhoto(newPhoto.url, newPhoto.title);
+    if (!newPhoto.url) return;
+    await dbService.addPhoto(newPhoto.url, newPhoto.title || 'Foto da Galeria');
     setNewPhoto({ url: '', title: '' });
     loadData();
   };
 
   const handleDeletePhoto = async (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta foto?')) {
+    if (confirm('Excluir esta foto?')) {
       await dbService.deletePhoto(id);
       loadData();
     }
@@ -153,47 +145,37 @@ const AdminPanel: React.FC = () => {
       ['ID', 'Nome', 'Email', 'Telefone', 'Data'],
       ...leads.map(l => [l.id, l.name, l.email, l.phone, new Date(l.createdAt).toLocaleString()])
     ].map(e => e.join(",")).join("\n");
-
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', 'leads_samba_brasil_fortaleza.csv');
+    a.href = url;
+    a.download = 'inscritos_samba_brasil_20anos.csv';
     a.click();
   };
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-blue-950 flex items-center justify-center p-4">
-        <form onSubmit={handleLogin} className="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm">
+      <div className="min-h-screen bg-[#269f78] flex items-center justify-center p-4">
+        <form onSubmit={handleLogin} className="bg-[#f4f1e1] p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border-4 border-white">
           <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg shadow-yellow-400/20">
-              <Users className="text-blue-900 w-10 h-10" />
+            <div className="w-20 h-20 bg-[#f37f3a] rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+              <Users className="text-white w-10 h-10" />
             </div>
           </div>
-          <h2 className="text-3xl font-black text-blue-900 text-center mb-2 uppercase tracking-tighter italic">Samba Admin</h2>
-          <p className="text-gray-400 text-center text-sm mb-8 font-medium">Controle de Acesso</p>
-          
+          <h2 className="text-2xl font-black text-[#269f78] text-center mb-8 uppercase italic tracking-tighter leading-none">Acesso Restrito<br/><span className="text-[#f37f3a] text-sm not-italic">Samba Brasil Admin</span></h2>
           <div className="space-y-6">
-            <div className="space-y-1">
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Senha de Acesso</label>
-              <input 
-                type="password" 
-                autoFocus
-                className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-mono"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
-            </div>
-            <button className="w-full bg-blue-900 text-white font-black py-5 rounded-2xl hover:bg-blue-800 transition-all shadow-xl shadow-blue-900/20 active:scale-95 uppercase tracking-widest text-xs">
-              ENTRAR NO PAINEL
+            <input 
+              type="password" 
+              autoFocus
+              className="w-full px-5 py-4 rounded-2xl border-2 border-transparent bg-white focus:border-[#f37f3a] outline-none transition-all font-mono text-center"
+              placeholder="Senha Mestra"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+            <button className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-900">
+              ACESSAR PAINEL
             </button>
-            <button 
-              type="button"
-              onClick={() => window.location.hash = '/'} 
-              className="w-full text-gray-400 font-bold text-xs uppercase tracking-widest py-2 flex items-center justify-center gap-2 hover:text-blue-900 transition-colors"
-            >
+            <button type="button" onClick={() => window.location.hash = '/'} className="w-full text-gray-400 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
               <ArrowLeft className="w-4 h-4" /> Voltar ao Site
             </button>
           </div>
@@ -203,99 +185,78 @@ const AdminPanel: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-72 bg-blue-950 text-white flex flex-col fixed h-full shadow-2xl z-20">
+    <div className="min-h-screen bg-[#f4f1e1] flex">
+      <aside className="w-72 bg-[#269f78] text-white flex flex-col fixed h-full shadow-2xl z-20">
         <div className="p-10">
-          <h1 className="text-2xl font-black uppercase italic tracking-tighter">Samba <span className="text-yellow-400 text-sm block not-italic tracking-widest mt-1 opacity-80">ADMIN 2026</span></h1>
+          <h1 className="text-2xl font-black uppercase italic tracking-tighter">SAMBA <span className="text-[#f6c83e] block text-xs not-italic tracking-[0.3em] mt-1">ADMIN 20 ANOS</span></h1>
         </div>
-        
-        <nav className="flex-1 px-6 space-y-3">
+        <nav className="flex-1 px-6 space-y-4">
           {[
             { id: 'leads', icon: Users, label: 'Inscritos' },
             { id: 'photos', icon: ImageIcon, label: 'Galeria' },
-            { id: 'settings', icon: Settings, label: 'Configurações' }
+            { id: 'settings', icon: Settings, label: 'Visual' }
           ].map(item => (
             <button 
               key={item.id}
               onClick={() => setActiveTab(item.id as any)}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-bold text-sm tracking-wide ${activeTab === item.id ? 'bg-blue-800 text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-white hover:bg-blue-900/50'}`}
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-xs uppercase tracking-widest ${activeTab === item.id ? 'bg-[#1e7e5f] text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
             >
-              <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-yellow-400' : ''}`} />
-              {item.label}
+              <item.icon className="w-4 h-4" /> {item.label}
             </button>
           ))}
         </nav>
-
-        <div className="p-6 space-y-2 border-t border-white/5 bg-blue-900/20">
-          <button 
-             onClick={() => window.location.hash = '/'} 
-             className="w-full flex items-center gap-4 px-5 py-3 text-gray-400 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Ver Site
-          </button>
-          <button 
-             onClick={handleLogout}
-             className="w-full flex items-center gap-4 px-5 py-3 text-red-400 hover:text-red-300 transition-all text-xs font-bold uppercase tracking-widest"
-          >
-            <LogOut className="w-4 h-4" />
-            Sair
+        <div className="p-8 border-t border-white/10">
+          <button onClick={handleLogout} className="w-full flex items-center gap-4 px-5 py-3 text-red-200 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest">
+            <LogOut className="w-4 h-4" /> Deslogar
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 ml-72 p-12 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-1 ml-72 p-12">
+        <div className="max-w-5xl mx-auto">
           {activeTab === 'leads' && (
-            <div className="animate-in fade-in duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div className="space-y-8 animate-in fade-in">
+              <div className="flex justify-between items-end">
                 <div>
-                  <h2 className="text-4xl font-black text-blue-900 tracking-tighter uppercase">Lista VIP</h2>
-                  <p className="text-gray-400 font-medium mt-1 uppercase tracking-widest text-xs">Total de {leads.length} inscritos confirmados</p>
+                  <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Inscritos</h2>
+                  <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Lista de Leads para a Pré-venda</p>
                 </div>
-                <button 
-                  onClick={exportLeads}
-                  className="flex items-center gap-3 bg-blue-900 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 transition-all shadow-xl shadow-blue-900/10 active:scale-95"
-                >
-                  <Download className="w-5 h-5" /> Exportar Planilha
+                <button onClick={exportLeads} className="bg-[#f37f3a] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#d86b2b] transition-all shadow-lg border-b-4 border-orange-800">
+                  <Download className="w-4 h-4" /> Exportar CSV
                 </button>
               </div>
 
-              <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-50 bg-gray-50/30">
-                  <div className="relative max-w-md">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="bg-white rounded-[2rem] shadow-sm border-2 border-white overflow-hidden">
+                <div className="p-6 bg-gray-50/50 border-b-2 border-gray-100">
+                  <div className="relative max-w-sm">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 w-4 h-4" />
                     <input 
                       type="text" 
-                      placeholder="Pesquisar inscritos..."
-                      className="w-full pl-12 pr-6 py-3 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-500/10 outline-none text-sm font-medium"
+                      placeholder="Buscar por nome ou email..."
+                      className="w-full pl-10 pr-6 py-3 rounded-xl border-2 border-gray-100 focus:border-[#269f78] outline-none text-xs font-bold"
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
                     />
                   </div>
                 </div>
-
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                        <th className="px-8 py-5">Nome do Inscrito</th>
-                        <th className="px-8 py-5">E-mail</th>
-                        <th className="px-8 py-5">WhatsApp</th>
-                        <th className="px-8 py-5">Data/Hora</th>
+                      <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50">
+                        <th className="px-8 py-4">Inscrito</th>
+                        <th className="px-8 py-4">WhatsApp</th>
+                        <th className="px-8 py-4">Inscrição</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y-2 divide-gray-50">
                       {filteredLeads.map(lead => (
-                        <tr key={lead.id} className="hover:bg-blue-50/30 transition-colors group">
-                          <td className="px-8 py-5 font-bold text-blue-900">{lead.name}</td>
-                          <td className="px-8 py-5 text-gray-600 font-medium">{lead.email}</td>
-                          <td className="px-8 py-5 text-blue-600 font-mono text-sm font-bold">{lead.phone}</td>
-                          <td className="px-8 py-5 text-gray-400 text-[11px] font-bold uppercase tracking-tighter">
-                            {new Date(lead.createdAt).toLocaleDateString()} • {new Date(lead.createdAt).toLocaleTimeString()}
+                        <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-8 py-5">
+                            <p className="font-black text-[#269f78] uppercase text-sm">{lead.name}</p>
+                            <p className="text-[11px] font-bold text-gray-400 lowercase">{lead.email}</p>
                           </td>
+                          <td className="px-8 py-5 font-mono text-xs font-black text-[#f37f3a]">{lead.phone}</td>
+                          <td className="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase">{new Date(lead.createdAt).toLocaleDateString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -306,88 +267,54 @@ const AdminPanel: React.FC = () => {
           )}
 
           {activeTab === 'photos' && (
-            <div className="animate-in fade-in duration-500">
-              <div className="mb-12">
-                <h2 className="text-4xl font-black text-blue-900 tracking-tighter uppercase">Galeria de Mídia</h2>
-                <p className="text-gray-400 font-medium mt-1 uppercase tracking-widest text-xs">Fotos ativas no carrossel da Landing Page</p>
+            <div className="space-y-12 animate-in fade-in">
+              <div className="flex justify-between items-end">
+                <div>
+                   <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Galeria</h2>
+                   <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Fotos que aparecem no carrossel</p>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 h-fit sticky top-12">
-                  <h3 className="text-xl font-black text-blue-900 mb-6 flex items-center gap-3 uppercase tracking-tighter">
-                    <Plus className="w-6 h-6 text-yellow-500" /> Nova Mídia
-                  </h3>
-                  <form onSubmit={handleAddPhoto} className="space-y-6">
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Legenda/Título</label>
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border-2 border-white h-fit">
+                   <h3 className="text-sm font-black text-[#269f78] mb-6 uppercase tracking-widest flex items-center gap-2"><Plus className="w-4 h-4" /> Nova Foto</h3>
+                   <div className="space-y-6">
+                      <div className="relative group">
+                        <div className="w-full aspect-[3/4] rounded-2xl border-4 border-dashed border-gray-100 flex flex-col items-center justify-center bg-gray-50 overflow-hidden">
+                           {newPhoto.url ? (
+                             <img src={newPhoto.url} className="w-full h-full object-cover" alt="Preview" />
+                           ) : (
+                             <>
+                               <ImageIcon className="w-10 h-10 text-gray-200 mb-2" />
+                               <p className="text-[10px] font-black text-gray-300 uppercase">Sugestão: 800 x 1000px</p>
+                             </>
+                           )}
+                        </div>
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+                        <button onClick={() => fileInputRef.current?.click()} className="mt-4 w-full bg-[#7db5d9] text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#6ca8cc] transition-all">Selecionar Arquivo</button>
+                      </div>
                       <input 
                         type="text" 
-                        required
-                        className="w-full px-5 py-4 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-yellow-400/10 focus:border-yellow-400 outline-none transition-all font-medium"
-                        placeholder="Ex: Noite de Samba"
+                        placeholder="Título opcional"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 text-xs font-bold"
                         value={newPhoto.title}
                         onChange={e => setNewPhoto({...newPhoto, title: e.target.value})}
                       />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Imagem da Galeria</label>
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        ref={fileInputRef} 
-                        accept="image/*"
-                        onChange={handlePhotoUpload} 
-                      />
-                      <button 
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full flex items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-8 text-gray-400 hover:border-yellow-400 hover:text-yellow-500 transition-all bg-gray-50 hover:bg-yellow-50/30"
-                      >
-                        {newPhoto.url ? (
-                          <div className="relative w-full h-full px-4">
-                            <img src={newPhoto.url} className="h-24 mx-auto rounded-lg object-cover" alt="Preview" />
-                            <p className="mt-2 text-[10px] font-bold uppercase tracking-widest">Clique para trocar</p>
-                          </div>
-                        ) : (
-                          <>
-                            <Upload className="w-6 h-6" />
-                            <div className="text-left">
-                               <p className="text-sm font-bold">Upload de Foto</p>
-                               <p className="text-[10px] uppercase">Sugestão: 800 x 1000px</p>
-                            </div>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <button className="w-full bg-yellow-400 text-blue-900 font-black py-5 rounded-2xl hover:bg-yellow-500 transition-all shadow-xl shadow-yellow-400/20 uppercase tracking-widest text-xs active:scale-95">
-                      ADICIONAR À GALERIA
-                    </button>
-                  </form>
+                      <button onClick={handleAddPhoto} className="w-full bg-[#269f78] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest border-b-4 border-green-900 shadow-xl">Adicionar na Galeria</button>
+                   </div>
                 </div>
 
-                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="lg:col-span-2 grid grid-cols-2 gap-6">
                   {photos.map(photo => (
-                    <div key={photo.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group animate-in zoom-in-95 duration-300">
-                      <div className="h-56 relative">
-                        <img src={photo.url} alt={photo.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                        <div className="absolute inset-0 bg-blue-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
-                           <button 
-                             onClick={() => handleTogglePhoto(photo.id)}
-                             className="p-3 bg-white rounded-2xl text-blue-900 hover:scale-110 transition-all shadow-xl"
-                             title={photo.active ? 'Ocultar no Site' : 'Exibir no Site'}
-                           >
-                             {photo.active ? <Eye className="w-6 h-6" /> : <EyeOff className="w-6 h-6 text-gray-400" />}
-                           </button>
-                           <button 
-                             onClick={() => handleDeletePhoto(photo.id)}
-                             className="p-3 bg-red-500 rounded-2xl text-white hover:scale-110 transition-all shadow-xl shadow-red-500/20"
-                             title="Excluir Permanentemente"
-                           >
-                             <Trash2 className="w-6 h-6" />
-                           </button>
-                        </div>
+                    <div key={photo.id} className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border-4 border-white aspect-[3/4]">
+                      <img src={photo.url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
+                      <div className="absolute inset-0 bg-[#269f78]/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
+                         <button onClick={() => handleTogglePhoto(photo.id)} className="p-3 bg-white rounded-xl text-[#269f78] shadow-xl hover:scale-110 transition-transform">
+                            {photo.active ? <Eye size={20} /> : <EyeOff size={20} className="text-gray-300" />}
+                         </button>
+                         <button onClick={() => handleDeletePhoto(photo.id)} className="p-3 bg-red-500 rounded-xl text-white shadow-xl hover:scale-110 transition-transform">
+                            <Trash2 size={20} />
+                         </button>
                       </div>
                     </div>
                   ))}
@@ -397,84 +324,44 @@ const AdminPanel: React.FC = () => {
           )}
 
           {activeTab === 'settings' && (
-            <div className="animate-in fade-in duration-500">
-              <div className="mb-12">
-                <h2 className="text-4xl font-black text-blue-900 tracking-tighter uppercase">Aparência do Site</h2>
-                <p className="text-gray-400 font-medium mt-1 uppercase tracking-widest text-xs">Configure os elementos principais da Landing Page</p>
-              </div>
-
-              <div className="max-w-3xl">
-                <form onSubmit={handleSaveSettings} className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-8">
-                  <div className="space-y-6">
+            <div className="space-y-12 animate-in fade-in">
+               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Identidade Visual</h2>
+               <div className="max-w-2xl bg-white p-10 rounded-[3rem] shadow-sm border-4 border-white">
+                 <form onSubmit={handleSaveSettings} className="space-y-8">
                     <div className="space-y-2">
-                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest ml-1">Nome Oficial do Evento</label>
+                      <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Título do Evento</label>
                       <input 
                         type="text" 
-                        required
-                        className="w-full px-6 py-5 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-lg text-blue-900"
+                        className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-black text-[#269f78] uppercase outline-none"
                         value={settings.eventName}
                         onChange={e => setSettings({...settings, eventName: e.target.value})}
                       />
                     </div>
-
+                    
                     <div className="space-y-4">
-                      <label className="block text-[10px] font-black text-blue-900 uppercase tracking-widest ml-1">Upload do Banner Principal</label>
-                      
-                      <div className="relative group">
-                        <div className="w-full h-64 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden relative group bg-gray-50">
-                          {settings.heroBannerUrl ? (
-                            <img src={settings.heroBannerUrl} className="w-full h-full object-cover" alt="Banner Preview" />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                              <ImageIcon className="w-12 h-12 mb-2" />
-                              <p>Nenhuma imagem definida</p>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-blue-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                            <button 
-                              type="button"
-                              onClick={() => bannerInputRef.current?.click()}
-                              className="bg-white text-blue-900 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2"
-                            >
-                              <Upload className="w-4 h-4" /> Alterar Banner
-                            </button>
-                          </div>
+                      <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Banner Principal (Horizontal)</label>
+                      <div className="w-full aspect-[21/9] rounded-2xl bg-[#f4f1e1] border-4 border-dashed border-gray-200 overflow-hidden relative group">
+                        {settings.heroBannerUrl ? (
+                          <img src={settings.heroBannerUrl} className="w-full h-full object-cover" alt="Preview" />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 italic">Sem banner definido</div>
+                        )}
+                        <div className="absolute inset-0 bg-[#269f78]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button type="button" onClick={() => bannerInputRef.current?.click()} className="bg-white text-[#269f78] px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest">Trocar Imagem</button>
                         </div>
-                        <input 
-                          type="file" 
-                          ref={bannerInputRef} 
-                          className="hidden" 
-                          accept="image/*"
-                          onChange={handleBannerUpload}
-                        />
                       </div>
-                      
-                      <div className="flex items-start gap-3 bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                        <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-                        <div>
-                           <p className="text-[11px] font-bold text-blue-900 uppercase tracking-widest">Dica Visual</p>
-                           <p className="text-xs text-blue-600 font-medium">Para um visual perfeito em computadores e celulares, use uma imagem horizontal de 1920 x 600 pixels.</p>
-                        </div>
+                      <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                      <div className="flex items-start gap-3 bg-blue-50 p-4 rounded-xl text-[10px] font-bold text-blue-600 uppercase tracking-widest">
+                        <AlertCircle className="w-4 h-4 shrink-0" /> Ideal: 1920x600 pixels para preenchimento total.
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-6 pt-6">
-                    <button 
-                      type="submit"
-                      disabled={isUploading}
-                      className="flex-1 bg-blue-900 text-white font-black py-5 rounded-2xl hover:bg-blue-800 transition-all shadow-xl shadow-blue-900/20 uppercase tracking-widest text-xs flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
-                    >
-                      {isUploading ? "Processando..." : <><Save className="w-5 h-5" /> SALVAR ALTERAÇÕES</>}
+                    <button disabled={isUploading} className="w-full bg-[#269f78] text-white py-6 rounded-2xl font-black uppercase tracking-widest border-b-8 border-[#1e7e5f] shadow-2xl active:translate-y-1 active:border-b-4 transition-all">
+                      {isUploading ? "PROCESSANDO ARQUIVO..." : "SALVAR ALTERAÇÕES"}
                     </button>
-                    {saveStatus && (
-                      <div className="flex items-center gap-2 text-green-600 font-black text-[10px] uppercase tracking-widest animate-in fade-in slide-in-from-left-4">
-                        <CheckCircle2 className="w-5 h-5" /> Configurações Atualizadas!
-                      </div>
-                    )}
-                  </div>
-                </form>
-              </div>
+                    {saveStatus && <p className="text-center text-green-600 font-black text-[10px] uppercase animate-pulse">Configurações salvas com sucesso!</p>}
+                 </form>
+               </div>
             </div>
           )}
         </div>

@@ -26,7 +26,10 @@ import {
   Type,
   CalendarDays,
   Target,
-  Code
+  Code,
+  Menu as MenuIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const AdminPanel: React.FC = () => {
@@ -53,6 +56,7 @@ const AdminPanel: React.FC = () => {
   const [password, setPassword] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -199,13 +203,60 @@ const AdminPanel: React.FC = () => {
     a.click();
   };
 
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#269f78] flex items-center justify-center p-4">
+        <form onSubmit={handleLogin} className="bg-[#f4f1e1] p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border-4 border-white">
+          <div className="flex justify-center mb-8">
+            <div className="w-20 h-20 bg-[#f37f3a] rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+              <Users className="text-white w-10 h-10" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-black text-[#269f78] text-center mb-8 uppercase italic tracking-tighter leading-none">Acesso Admin<br/><span className="text-[#f37f3a] text-sm not-italic">D&E MUSIC</span></h2>
+          <div className="space-y-6">
+            <input 
+              type="password" 
+              autoFocus
+              className="w-full px-5 py-4 rounded-2xl border-2 border-transparent bg-white focus:border-[#f37f3a] outline-none transition-all font-mono text-center"
+              placeholder="Digite a Senha"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+            <button type="submit" className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-900">
+              ENTRAR NO PAINEL
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#f4f1e1] flex">
+    <div className="min-h-screen bg-[#f4f1e1] flex relative transition-all duration-300">
+      {/* Botão de abrir menu (quando fechado) */}
+      {!isSidebarVisible && (
+        <button 
+          onClick={() => setIsSidebarVisible(true)}
+          className="fixed top-6 left-6 z-50 bg-[#269f78] text-white p-4 rounded-2xl shadow-xl border-2 border-white hover:scale-110 transition-all active:scale-95"
+          title="Abrir Menu"
+        >
+          <MenuIcon className="w-6 h-6" />
+        </button>
+      )}
+
       {/* Sidebar Admin */}
-      <aside className="w-72 bg-[#269f78] text-white flex flex-col fixed h-full shadow-2xl z-20">
-        <div className="p-10">
+      <aside className={`w-72 bg-[#269f78] text-white flex flex-col fixed h-full shadow-2xl z-40 transition-transform duration-300 ease-in-out ${isSidebarVisible ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-10 flex justify-between items-start">
           <h1 className="text-2xl font-black uppercase italic tracking-tighter leading-tight">SAMBA <span className="text-[#f6c83e] block text-[10px] not-italic tracking-[0.3em] mt-1 opacity-80">ADMIN D&E MUSIC</span></h1>
+          <button 
+            onClick={() => setIsSidebarVisible(false)}
+            className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all md:block hidden"
+            title="Recolher Menu"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
         </div>
+        
         <nav className="flex-1 px-6 space-y-4 overflow-y-auto pb-8">
           <button 
             onClick={() => window.location.hash = '/'} 
@@ -235,11 +286,19 @@ const AdminPanel: React.FC = () => {
         </div>
       </aside>
 
-      <main className="flex-1 ml-72 p-12">
+      {/* Overlay para mobile quando o menu estiver aberto */}
+      {isSidebarVisible && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-30 md:hidden"
+          onClick={() => setIsSidebarVisible(false)}
+        />
+      )}
+
+      <main className={`flex-1 p-6 md:p-12 transition-all duration-300 ${isSidebarVisible ? 'ml-72' : 'ml-0 pt-24'}`}>
         <div className="max-w-5xl mx-auto">
           {activeTab === 'leads' && (
             <div className="space-y-8 animate-in fade-in">
-              <div className="flex justify-between items-end">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
                   <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Inscritos</h2>
                   <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Base de dados para pré-venda</p>
@@ -249,7 +308,7 @@ const AdminPanel: React.FC = () => {
                 </button>
               </div>
               <div className="bg-white rounded-[2rem] shadow-sm border-2 border-white overflow-hidden">
-                <div className="p-6 bg-gray-50/50 border-b-2 border-gray-100 flex justify-between items-center">
+                <div className="p-6 bg-gray-50/50 border-b-2 border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="relative max-w-sm w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 w-4 h-4" />
                     <input 
@@ -307,7 +366,7 @@ const AdminPanel: React.FC = () => {
                       <button onClick={handleAddPhoto} className="w-full bg-[#269f78] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest border-b-4 border-green-900 shadow-xl">Publicar Galeria</button>
                    </div>
                 </div>
-                <div className="lg:col-span-2 grid grid-cols-2 gap-6">
+                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {photos.map(photo => (
                     <div key={photo.id} className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border-4 border-white aspect-[3/4]">
                       <img src={photo.url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
@@ -325,7 +384,7 @@ const AdminPanel: React.FC = () => {
           {activeTab === 'settings' && (
             <div className="space-y-12 animate-in fade-in">
                <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Identidade Visual</h2>
-               <div className="max-w-4xl bg-white p-10 rounded-[3rem] shadow-sm border-4 border-white">
+               <div className="bg-white p-6 md:p-10 rounded-[3rem] shadow-sm border-4 border-white">
                  <form onSubmit={handleSaveSettings} className="space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
@@ -388,7 +447,7 @@ const AdminPanel: React.FC = () => {
           {activeTab === 'marketing' && (
             <div className="space-y-12 animate-in fade-in">
                <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Marketing & Conversão</h2>
-               <div className="max-w-4xl bg-white p-10 rounded-[3rem] shadow-sm border-4 border-white">
+               <div className="bg-white p-6 md:p-10 rounded-[3rem] shadow-sm border-4 border-white">
                  <form onSubmit={handleSaveSettings} className="space-y-8">
                     <div className="bg-[#269f78]/5 p-6 rounded-3xl border border-[#269f78]/10">
                       <h3 className="flex items-center gap-2 font-black text-[#269f78] uppercase text-xs mb-4"><Target className="w-4 h-4" /> Configuração Meta (Facebook/Instagram)</h3>

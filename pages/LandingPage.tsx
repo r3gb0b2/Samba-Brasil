@@ -85,8 +85,9 @@ const LandingPage: React.FC = () => {
         setFormData({ name: '', email: '', phone: '' });
         
         // Disparar evento de conversão do Meta se o Pixel estiver configurado
-        if (window.fbq) {
-          window.fbq('track', 'Lead', {
+        // Fix: Cast window to any to access fbq which is added dynamically by the pixel script
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'Lead', {
             content_name: 'Inscrição Pré-venda Samba Brasil',
             status: 'Success'
           });

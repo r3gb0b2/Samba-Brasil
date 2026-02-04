@@ -5,18 +5,14 @@ import PhotoCarousel from '../components/PhotoCarousel';
 import { dbService } from '../services/db';
 import { SiteSettings } from '../types';
 import { 
-  Users, 
-  Mail, 
-  Phone, 
   CheckCircle, 
   AlertCircle, 
   Calendar, 
   MapPin, 
   Ticket, 
   Instagram, 
-  Facebook, 
-  Youtube, 
-  CreditCard,
+  Youtube,
+  Music,
   Flame
 } from 'lucide-react';
 
@@ -32,14 +28,18 @@ const LandingPage: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
   const [loading, setLoading] = useState(false);
-  const [leadCount, setLeadCount] = useState<number>(0);
 
   useEffect(() => {
+    let sessionId = sessionStorage.getItem('sb_session_id');
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).substring(2, 15);
+      sessionStorage.setItem('sb_session_id', sessionId);
+    }
+
     const loadSettings = async () => {
       const s = await dbService.getSettings();
       setSettings(s);
       
-      // Injeção de Scripts de Marketing (Meta Pixel)
       if (s.facebookPixelId && s.facebookPixelId.trim() !== '') {
         if (!window.fbq) {
           (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
@@ -52,14 +52,12 @@ const LandingPage: React.FC = () => {
             s.parentNode.insertBefore(t, s)
           })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
         }
-
         if (window.fbq) {
           window.fbq('init', s.facebookPixelId);
           window.fbq('track', 'PageView');
         }
       }
 
-      // Scripts Customizados
       if (s.customHeadScript) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = s.customHeadScript;
@@ -75,12 +73,12 @@ const LandingPage: React.FC = () => {
 
     loadSettings();
 
-    // Inscrição em tempo real para contagem de leads
-    const unsubscribe = dbService.subscribeLeadsCount((count) => {
-      setLeadCount(count);
-    });
+    dbService.updateUserPresence(sessionId);
+    const presenceInterval = setInterval(() => {
+      dbService.updateUserPresence(sessionId);
+    }, 30000);
 
-    return () => unsubscribe();
+    return () => clearInterval(presenceInterval);
   }, []);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +100,6 @@ const LandingPage: React.FC = () => {
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, "");
     if (value.length > 11) value = value.slice(0, 11);
-    
     let masked = value;
     if (value.length > 3) {
       masked = value.substring(0, 3) + "." + value.substring(3);
@@ -203,20 +200,12 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Form Section com Contador Real-time */}
+      {/* Form Section */}
       <section className="pt-20 pb-12 px-6">
         <div className="container mx-auto flex justify-center max-w-7xl">
           <div className="w-full max-w-md">
             <div className="bg-white p-8 md:p-12 rounded-[3.5rem] md:rounded-[4rem] shadow-[0_32px_0_rgba(38,159,120,0.1)] border-4 border-[#269f78] relative overflow-hidden">
-              <h4 className="text-3xl font-black text-[#269f78] mb-2 uppercase tracking-tighter italic leading-none text-center">Lista para pré-venda</h4>
-              
-              {/* Contador de Prova Social */}
-              <div className="flex items-center justify-center gap-2 mb-8 bg-[#f37f3a]/10 py-2 px-4 rounded-full w-fit mx-auto animate-pulse">
-                <Flame className="w-4 h-4 text-[#f37f3a] fill-[#f37f3a]" />
-                <span className="text-[#f37f3a] font-black text-[10px] uppercase tracking-widest">
-                  {leadCount > 0 ? `+${leadCount} pessoas já cadastradas` : 'Inscrições abertas'}
-                </span>
-              </div>
+              <h4 className="text-3xl font-black text-[#269f78] mb-10 uppercase tracking-tighter italic leading-none text-center">Lista para pré-venda</h4>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-1">
@@ -270,7 +259,7 @@ const LandingPage: React.FC = () => {
 
                 <button 
                   disabled={loading}
-                  className="w-full bg-[#f37f3a] hover:bg-[#d86b2b] text-white font-black py-6 rounded-3xl shadow-xl shadow-orange-500/30 transform active:scale-95 transition-all uppercase tracking-widest mt-4 border-b-8 border-orange-800"
+                  className="w-full bg-[#f37f3a] hover:bg-[#d86b2b] text-white font-black py-6 rounded-3xl shadow-xl shadow-orange-500/30 transform active:scale-95 transition-all uppercase tracking-widest mt-6 border-b-8 border-orange-800"
                 >
                   {loading ? 'AGUARDE...' : 'Cadastrar na pré-venda'}
                 </button>
@@ -336,9 +325,9 @@ const LandingPage: React.FC = () => {
             </div>
             <div className="flex flex-col items-center md:items-end gap-6">
               <div className="flex gap-8">
-                <a href={settings?.instagramUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all"><Instagram size={24} /></a>
-                <a href={settings?.facebookUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all"><Facebook size={24} /></a>
-                <a href={settings?.tiktokUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all"><Youtube size={24} /></a>
+                <a href={settings?.instagramUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="Instagram"><Instagram size={24} /></a>
+                <a href={settings?.tiktokUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="TikTok"><Music size={24} /></a>
+                <a href={settings?.youtubeUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="YouTube"><Youtube size={24} /></a>
               </div>
             </div>
           </div>

@@ -13,7 +13,9 @@ import {
   doc, 
   setDoc,
   updateDoc,
-  onSnapshot
+  onSnapshot,
+  serverTimestamp,
+  Timestamp
 } from 'firebase/firestore';
 import { Lead, Photo, SiteSettings } from '../types';
 
@@ -33,6 +35,7 @@ const db = getFirestore(app);
 const LEADS_COLLECTION = 'leads';
 const PHOTOS_COLLECTION = 'photos';
 const SETTINGS_COLLECTION = 'settings';
+const PRESENCE_COLLECTION = 'presence';
 const GLOBAL_SETTINGS_ID = 'global';
 
 export const dbService = {
@@ -44,50 +47,19 @@ export const dbService = {
         const data = docSnap.data() as SiteSettings;
         return {
           ...data,
-          logoUrl: data.logoUrl || 'https://raw.githubusercontent.com/ai-images/placeholders/main/samba-brasil-logo.png',
-          eventDescription: data.eventDescription || 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
-          eventDateDisplay: data.eventDateDisplay || '08 de Agosto',
-          eventDayBanner: data.eventDayBanner || '08',
-          eventMonthBanner: data.eventMonthBanner || 'AGOSTO',
-          instagramUrl: data.instagramUrl || '#',
-          facebookUrl: data.facebookUrl || '#',
-          tiktokUrl: data.tiktokUrl || '#',
-          facebookPixelId: data.facebookPixelId || '',
-          googleTagManagerId: data.googleTagManagerId || '',
-          customHeadScript: data.customHeadScript || ''
+          logoUrl: data.logoUrl || '',
+          eventDescription: data.eventDescription || '',
+          eventDateDisplay: data.eventDateDisplay || '',
+          eventDayBanner: data.eventDayBanner || '',
+          eventMonthBanner: data.eventMonthBanner || '',
+          instagramUrl: data.instagramUrl || '',
+          youtubeUrl: data.youtubeUrl || '',
+          tiktokUrl: data.tiktokUrl || '',
         };
       }
-      return {
-        logoUrl: 'https://raw.githubusercontent.com/ai-images/placeholders/main/samba-brasil-logo.png',
-        heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
-        eventName: 'Samba Brasil Fortaleza 2026',
-        eventDescription: 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
-        eventDateDisplay: '08 de Agosto',
-        eventDayBanner: '08',
-        eventMonthBanner: 'AGOSTO',
-        instagramUrl: '#',
-        facebookUrl: '#',
-        tiktokUrl: '#',
-        facebookPixelId: '',
-        googleTagManagerId: '',
-        customHeadScript: ''
-      };
+      return {} as SiteSettings;
     } catch (error) {
-      return {
-        logoUrl: '',
-        heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
-        eventName: 'Samba Brasil Fortaleza 2026',
-        eventDescription: 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.',
-        eventDateDisplay: '08 de Agosto',
-        eventDayBanner: '08',
-        eventMonthBanner: 'AGOSTO',
-        instagramUrl: '#',
-        facebookUrl: '#',
-        tiktokUrl: '#',
-        facebookPixelId: '',
-        googleTagManagerId: '',
-        customHeadScript: ''
-      };
+      return {} as SiteSettings;
     }
   },
 
@@ -97,7 +69,6 @@ export const dbService = {
       await setDoc(docRef, settings, { merge: true });
       return { success: true };
     } catch (error: any) {
-      console.error("Erro ao salvar:", error);
       return { success: false, error: error.message };
     }
   },
@@ -115,10 +86,32 @@ export const dbService = {
     }
   },
 
-  subscribeLeadsCount(callback: (count: number) => void) {
-    const q = collection(db, LEADS_COLLECTION);
+  // Sistema de Presença (Heartbeat)
+  async updateUserPresence(sessionId: string) {
+    try {
+      const presenceRef = doc(db, PRESENCE_COLLECTION, sessionId);
+      await setDoc(presenceRef, {
+        lastSeen: serverTimestamp()
+      });
+    } catch (e) {
+      console.error("Error updating presence", e);
+    }
+  },
+
+  subscribeOnlineCount(callback: (count: number) => void) {
+    const q = collection(db, PRESENCE_COLLECTION);
     return onSnapshot(q, (snapshot) => {
-      callback(snapshot.size);
+      const now = Date.now();
+      const oneMinuteAgo = now - 60000;
+      
+      const onlineUsers = snapshot.docs.filter(doc => {
+        const data = doc.data();
+        if (!data.lastSeen) return false;
+        const lastSeenMillis = data.lastSeen instanceof Timestamp ? data.lastSeen.toMillis() : data.lastSeen;
+        return lastSeenMillis > oneMinuteAgo;
+      });
+      
+      callback(onlineUsers.length);
     });
   },
 

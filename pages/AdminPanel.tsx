@@ -12,31 +12,24 @@ import {
   Search, 
   Download,
   Plus,
-  ArrowLeft,
   Settings,
-  Save,
-  CheckCircle2,
-  Upload,
-  AlertCircle,
   Loader2,
   ExternalLink,
-  Instagram,
-  Facebook,
-  Youtube,
-  Type,
-  CalendarDays,
   Target,
   Code,
   Menu as MenuIcon,
   ChevronLeft,
-  ChevronRight,
-  CreditCard
+  Flame,
+  Instagram,
+  Youtube,
+  Music
 } from 'lucide-react';
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'leads' | 'photos' | 'settings' | 'marketing'>('leads');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [onlineCount, setOnlineCount] = useState<number>(0);
   const [settings, setSettings] = useState<SiteSettings>({ 
     logoUrl: '',
     heroBannerUrl: '', 
@@ -46,7 +39,7 @@ const AdminPanel: React.FC = () => {
     eventDayBanner: '',
     eventMonthBanner: '',
     instagramUrl: '',
-    facebookUrl: '',
+    youtubeUrl: '',
     tiktokUrl: '',
     facebookPixelId: '',
     googleTagManagerId: '',
@@ -81,7 +74,13 @@ const AdminPanel: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn) loadData();
+    if (isLoggedIn) {
+      loadData();
+      const unsubscribe = dbService.subscribeOnlineCount((count) => {
+        setOnlineCount(count);
+      });
+      return () => unsubscribe();
+    }
   }, [isLoggedIn]);
 
   const compressImage = (file: File, maxWidth: number = 1920): Promise<string> => {
@@ -306,15 +305,10 @@ const AdminPanel: React.FC = () => {
         </div>
       </aside>
 
-      {isSidebarVisible && (
-        <div className="fixed inset-0 bg-black/20 z-30 md:hidden" onClick={() => setIsSidebarVisible(false)} />
-      )}
-
       <main className={`flex-1 p-6 md:p-12 transition-all duration-300 ${isSidebarVisible ? 'ml-72' : 'ml-0 pt-24'}`}>
         <div className="max-w-5xl mx-auto">
           
-          {/* Header de Seção com Link do Site */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">
                 {activeTab === 'leads' && 'Inscritos'}
@@ -322,7 +316,14 @@ const AdminPanel: React.FC = () => {
                 {activeTab === 'settings' && 'Identidade Visual'}
                 {activeTab === 'marketing' && 'Marketing & Conversão'}
               </h2>
-              <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Controle Administrativo Samba Brasil</p>
+              <div className="flex items-center gap-3 mt-1">
+                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Painel de Controle</p>
+                <div className="h-1 w-1 bg-gray-300 rounded-full"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                  <span className="text-[10px] font-black text-[#269f78] uppercase tracking-widest">Online Agora: {onlineCount}</span>
+                </div>
+              </div>
             </div>
             <a 
               href="#/" 
@@ -352,7 +353,7 @@ const AdminPanel: React.FC = () => {
                       onChange={e => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <span className="text-[10px] font-black text-[#269f78] uppercase">{leads.length} Cadastros</span>
+                  <span className="text-[10px] font-black text-[#269f78] uppercase">{leads.length} Cadastros Totais</span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
@@ -460,16 +461,16 @@ const AdminPanel: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Instagram (Link)</label>
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-1"><Instagram size={12}/> Instagram (Link)</label>
                             <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.instagramUrl} onChange={e => setSettings({...settings, instagramUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Facebook (Link)</label>
-                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.facebookUrl} onChange={e => setSettings({...settings, facebookUrl: e.target.value})} />
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-1"><Music size={12}/> TikTok (Link)</label>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.tiktokUrl} onChange={e => setSettings({...settings, tiktokUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Outra Rede (Link)</label>
-                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.tiktokUrl} onChange={e => setSettings({...settings, tiktokUrl: e.target.value})} />
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-1"><Youtube size={12}/> YouTube (Link)</label>
+                            <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.youtubeUrl} onChange={e => setSettings({...settings, youtubeUrl: e.target.value})} />
                         </div>
                     </div>
                     
@@ -508,7 +509,7 @@ const AdminPanel: React.FC = () => {
                             value={settings.facebookPixelId} 
                             onChange={e => setSettings({...settings, facebookPixelId: e.target.value})} 
                           />
-                          <p className="text-[9px] text-gray-400 font-bold ml-2 italic">Cole apenas o número do ID. O evento de 'Lead' será disparado automaticamente em cada cadastro.</p>
+                          <p className="text-[9px] text-gray-400 font-bold ml-2 italic">Cole apenas o número do ID.</p>
                         </div>
                       </div>
                     </div>

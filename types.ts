@@ -24,7 +24,7 @@ export interface SiteSettings {
   eventMonthBanner: string;
   eventDayBanner: string;
   instagramUrl?: string;
-  facebookUrl?: string;
+  youtubeUrl?: string;
   tiktokUrl?: string;
   // Campos de Marketing/Meta
   facebookPixelId?: string;

@@ -14,6 +14,11 @@ export interface Photo {
   active: boolean;
 }
 
+export interface SiteSettings {
+  heroBannerUrl: string;
+  eventName: string;
+}
+
 export interface AdminStats {
   totalLeads: number;
   recentLeads: Lead[];

@@ -11,11 +11,11 @@ import {
   orderBy, 
   deleteDoc, 
   doc, 
+  setDoc,
   updateDoc 
 } from 'firebase/firestore';
-import { Lead, Photo } from '../types';
+import { Lead, Photo, SiteSettings } from '../types';
 
-// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDsi6VpfhLQW8UWgAp5c4TRV7vqOkDyauU",
   authDomain: "stingressos-e0a5f.firebaseapp.com",
@@ -26,14 +26,47 @@ const firebaseConfig = {
   measurementId: "G-EEWHM37VXR"
 };
 
-// Inicializa o Firebase garantindo que não existam múltiplas instâncias
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
 const LEADS_COLLECTION = 'leads';
 const PHOTOS_COLLECTION = 'photos';
+const SETTINGS_COLLECTION = 'settings';
+const GLOBAL_SETTINGS_ID = 'global';
 
 export const dbService = {
+  // --- SETTINGS ---
+  async getSettings(): Promise<SiteSettings> {
+    try {
+      const docRef = doc(db, SETTINGS_COLLECTION, GLOBAL_SETTINGS_ID);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data() as SiteSettings;
+      }
+      // Defaults
+      return {
+        heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
+        eventName: 'Samba Brasil Fortaleza 2026'
+      };
+    } catch (error) {
+      console.error("Erro ao buscar configurações:", error);
+      return {
+        heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
+        eventName: 'Samba Brasil Fortaleza 2026'
+      };
+    }
+  },
+
+  async updateSettings(settings: Partial<SiteSettings>): Promise<void> {
+    try {
+      const docRef = doc(db, SETTINGS_COLLECTION, GLOBAL_SETTINGS_ID);
+      await setDoc(docRef, settings, { merge: true });
+    } catch (error) {
+      console.error("Erro ao atualizar configurações:", error);
+    }
+  },
+
+  // --- LEADS ---
   async getLeads(): Promise<Lead[]> {
     try {
       const q = query(collection(db, LEADS_COLLECTION), orderBy('createdAt', 'desc'));
@@ -54,7 +87,7 @@ export const dbService = {
       const querySnapshot = await getDocs(q);
       
       if (!querySnapshot.empty) {
-        return { success: false, message: 'Este e-mail já está cadastrado em nossa lista!' };
+        return { success: false, message: 'Este e-mail já está cadastrado!' };
       }
 
       await addDoc(collection(db, LEADS_COLLECTION), {
@@ -70,6 +103,7 @@ export const dbService = {
     }
   },
 
+  // --- PHOTOS ---
   async getPhotos(): Promise<Photo[]> {
     try {
       const querySnapshot = await getDocs(collection(db, PHOTOS_COLLECTION));
@@ -77,13 +111,6 @@ export const dbService = {
         id: doc.id,
         ...doc.data()
       })) as Photo[];
-
-      if (photos.length === 0) {
-        return [
-          { id: 'default1', url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800', title: 'Samba 1', active: true },
-          { id: 'default2', url: 'https://images.unsplash.com/photo-1545127398-14699f92334b?auto=format&fit=crop&q=80&w=800', title: 'Samba 2', active: true }
-        ];
-      }
       return photos;
     } catch (error) {
       console.error("Erro ao buscar fotos:", error);
@@ -93,12 +120,7 @@ export const dbService = {
 
   async addPhoto(url: string, title: string): Promise<void> {
     try {
-      await addDoc(collection(db, PHOTOS_COLLECTION), {
-        url,
-        title,
-        active: true,
-        createdAt: Date.now()
-      });
+      await addDoc(collection(db, PHOTOS_COLLECTION), { url, title, active: true, createdAt: Date.now() });
     } catch (error) {
       console.error("Erro ao adicionar foto:", error);
     }
@@ -117,9 +139,7 @@ export const dbService = {
       const photoRef = doc(db, PHOTOS_COLLECTION, id);
       const photoSnap = await getDoc(photoRef);
       if (photoSnap.exists()) {
-        await updateDoc(photoRef, {
-          active: !photoSnap.data().active
-        });
+        await updateDoc(photoRef, { active: !photoSnap.data().active });
       }
     } catch (error) {
       console.error("Erro ao alterar status da foto:", error);

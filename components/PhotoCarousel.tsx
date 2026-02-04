@@ -29,11 +29,11 @@ const PhotoCarousel: React.FC = () => {
       </div>
 
       <div className="relative">
-        <div className="flex animate-scroll gap-6 px-4">
+        <div className="flex animate-scroll gap-4 md:gap-6 px-4">
           {displayPhotos.map((photo, index) => (
             <div 
               key={`${photo.id}-${index}`} 
-              className="min-w-[300px] h-[400px] rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500"
+              className="min-w-[240px] md:min-w-[300px] h-[320px] md:h-[400px] rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500"
             >
               <img 
                 src={photo.url} 

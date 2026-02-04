@@ -4,10 +4,10 @@ import Header from '../components/Header';
 import PhotoCarousel from '../components/PhotoCarousel';
 import { dbService } from '../services/db';
 import { SiteSettings } from '../types';
-import { Users, Mail, Phone, CheckCircle, AlertCircle, Calendar, MapPin, Ticket, Instagram, Facebook, Youtube } from 'lucide-react';
+import { Users, Mail, Phone, CheckCircle, AlertCircle, Calendar, MapPin, Ticket, Instagram, Facebook, Youtube, CreditCard } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', cpf: '' });
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
   const [loading, setLoading] = useState(false);
@@ -66,6 +66,23 @@ const LandingPage: React.FC = () => {
     setFormData({ ...formData, phone: masked });
   };
 
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 11) value = value.slice(0, 11);
+    
+    let masked = value;
+    if (value.length > 3) {
+      masked = value.substring(0, 3) + "." + value.substring(3);
+      if (value.length > 6) {
+        masked = masked.substring(0, 7) + "." + value.substring(6);
+        if (value.length > 9) {
+          masked = masked.substring(0, 11) + "-" + value.substring(9);
+        }
+      }
+    }
+    setFormData({ ...formData, cpf: masked });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -78,14 +95,18 @@ const LandingPage: React.FC = () => {
       return;
     }
 
+    if (formData.cpf.replace(/\D/g, "").length < 11) {
+      setStatus({ type: 'error', message: 'CPF inválido.' });
+      setLoading(false);
+      return;
+    }
+
     try {
       const result = await dbService.addLead(formData);
       if (result.success) {
         setStatus({ type: 'success', message: result.message });
-        setFormData({ name: '', email: '', phone: '' });
+        setFormData({ name: '', email: '', phone: '', cpf: '' });
         
-        // Disparar evento de conversão do Meta se o Pixel estiver configurado
-        // Fix: Cast window to any to access fbq which is added dynamically by the pixel script
         if ((window as any).fbq) {
           (window as any).fbq('track', 'Lead', {
             content_name: 'Inscrição Pré-venda Samba Brasil',
@@ -134,10 +155,10 @@ const LandingPage: React.FC = () => {
 
              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
                <div className="bg-[#7db5d9] text-white px-10 py-3 rounded-full font-black text-xl shadow-lg border-2 border-white uppercase mb-[-12px] z-10 scale-90 md:scale-110">
-                 PRÉ-VENDA
+                 DATA DO EVENTO
                </div>
                <div className="bg-[#f37f3a] text-white px-10 md:px-16 py-6 md:py-8 rounded-3xl md:rounded-[3rem] font-black text-4xl md:text-7xl shadow-2xl border-4 border-white transform rotate-[-2deg] tracking-tight">
-                 {settings?.eventDayBanner || '18'}.{settings?.eventMonthBanner || 'AGOSTO'}
+                 {settings?.eventDayBanner || '08'}.{settings?.eventMonthBanner || 'AGOSTO'}
                </div>
              </div>
           </div>
@@ -179,16 +200,29 @@ const LandingPage: React.FC = () => {
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">WhatsApp</label>
-                  <input 
-                    type="tel" 
-                    required
-                    placeholder="(85) 9999-9999"
-                    className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all"
-                    value={formData.phone}
-                    onChange={handlePhoneChange}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">WhatsApp</label>
+                    <input 
+                      type="tel" 
+                      required
+                      placeholder="(85) 9999-9999"
+                      className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">CPF</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="999.999.999-99"
+                      className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all"
+                      value={formData.cpf}
+                      onChange={handleCpfChange}
+                    />
+                  </div>
                 </div>
 
                 <button 
@@ -229,7 +263,7 @@ const LandingPage: React.FC = () => {
                  <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border-2 border-[#f4f1e1]">
                    <Calendar className="text-[#f37f3a] w-10 h-10 mb-4" />
                    <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Quando</p>
-                   <p className="font-black text-[#269f78] text-2xl uppercase italic">{settings?.eventDateDisplay || '18 de Agosto'}</p>
+                   <p className="font-black text-[#269f78] text-2xl uppercase italic">{settings?.eventDateDisplay || '08 de Agosto'}</p>
                  </div>
                  <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border-2 border-[#f4f1e1]">
                    <Ticket className="text-[#7db5d9] w-10 h-10 mb-4" />

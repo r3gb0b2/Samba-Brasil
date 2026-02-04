@@ -4,6 +4,7 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
+  cpf: string;
   createdAt: number;
 }
 

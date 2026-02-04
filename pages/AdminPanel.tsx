@@ -29,7 +29,8 @@ import {
   Code,
   Menu as MenuIcon,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  CreditCard
 } from 'lucide-react';
 
 const AdminPanel: React.FC = () => {
@@ -187,13 +188,14 @@ const AdminPanel: React.FC = () => {
 
   const filteredLeads = leads.filter(l => 
     l.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    l.email.toLowerCase().includes(searchTerm.toLowerCase())
+    l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.cpf.includes(searchTerm)
   );
 
   const exportLeads = () => {
     const csv = [
-      ['ID', 'Nome', 'Email', 'Telefone', 'Data'],
-      ...leads.map(l => [l.id, l.name, l.email, l.phone, new Date(l.createdAt).toLocaleString()])
+      ['ID', 'Nome', 'Email', 'Telefone', 'CPF', 'Data'],
+      ...leads.map(l => [l.id, l.name, l.email, l.phone, l.cpf, new Date(l.createdAt).toLocaleString()])
     ].map(e => e.join(",")).join("\n");
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -326,6 +328,7 @@ const AdminPanel: React.FC = () => {
                     <thead>
                       <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50">
                         <th className="px-8 py-4">Inscrito</th>
+                        <th className="px-8 py-4">CPF</th>
                         <th className="px-8 py-4">WhatsApp</th>
                         <th className="px-8 py-4">Data</th>
                       </tr>
@@ -337,6 +340,7 @@ const AdminPanel: React.FC = () => {
                             <p className="font-black text-[#269f78] uppercase text-sm">{lead.name}</p>
                             <p className="text-[11px] font-bold text-gray-400 lowercase">{lead.email}</p>
                           </td>
+                          <td className="px-8 py-5 font-mono text-xs font-black text-gray-600">{lead.cpf}</td>
                           <td className="px-8 py-5 font-mono text-xs font-black text-[#f37f3a]">{lead.phone}</td>
                           <td className="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase">{new Date(lead.createdAt).toLocaleDateString()}</td>
                         </tr>

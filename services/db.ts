@@ -12,7 +12,8 @@ import {
   deleteDoc, 
   doc, 
   setDoc,
-  updateDoc 
+  updateDoc,
+  onSnapshot
 } from 'firebase/firestore';
 import { Lead, Photo, SiteSettings } from '../types';
 
@@ -112,6 +113,13 @@ export const dbService = {
     } catch (error) {
       return [];
     }
+  },
+
+  subscribeLeadsCount(callback: (count: number) => void) {
+    const q = collection(db, LEADS_COLLECTION);
+    return onSnapshot(q, (snapshot) => {
+      callback(snapshot.size);
+    });
   },
 
   async addLead(lead: Omit<Lead, 'id' | 'createdAt'>): Promise<{ success: boolean; message: string }> {

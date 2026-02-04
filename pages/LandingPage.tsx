@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import PhotoCarousel from '../components/PhotoCarousel';
@@ -15,7 +16,8 @@ import {
   Instagram, 
   Facebook, 
   Youtube, 
-  CreditCard 
+  CreditCard,
+  Flame
 } from 'lucide-react';
 
 declare global {
@@ -30,6 +32,7 @@ const LandingPage: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
   const [loading, setLoading] = useState(false);
+  const [leadCount, setLeadCount] = useState<number>(0);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -53,11 +56,10 @@ const LandingPage: React.FC = () => {
         if (window.fbq) {
           window.fbq('init', s.facebookPixelId);
           window.fbq('track', 'PageView');
-          console.log("✅ Meta Pixel inicializado:", s.facebookPixelId);
         }
       }
 
-      // Scripts Customizados (GTM / Analytics)
+      // Scripts Customizados
       if (s.customHeadScript) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = s.customHeadScript;
@@ -70,7 +72,15 @@ const LandingPage: React.FC = () => {
         });
       }
     };
+
     loadSettings();
+
+    // Inscrição em tempo real para contagem de leads
+    const unsubscribe = dbService.subscribeLeadsCount((count) => {
+      setLeadCount(count);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,16 +138,12 @@ const LandingPage: React.FC = () => {
       const result = await dbService.addLead(formData);
       if (result.success) {
         setStatus({ type: 'success', message: result.message });
-        
         if (typeof window.fbq === 'function') {
           window.fbq('track', 'Lead', {
-            content_name: 'Inscrição Pré-venda Samba Brasil 20 Anos',
-            status: 'success',
-            value: 0,
-            currency: 'BRL'
+            content_name: 'Inscrição Pré-venda Samba Brasil',
+            status: 'success'
           });
         }
-
         setFormData({ name: '', email: '', phone: '', cpf: '' });
       } else {
         setStatus({ type: 'error', message: result.message });
@@ -153,7 +159,7 @@ const LandingPage: React.FC = () => {
     <main className="min-h-screen">
       <Header />
       
-      {/* Hero Cartaz Section */}
+      {/* Hero Section */}
       <section className="relative pt-32 md:pt-40 pb-12 overflow-hidden">
         <div className="container mx-auto px-6 md:px-12 lg:px-16 flex flex-col items-center text-center">
           <div className="w-full max-w-6xl relative">
@@ -168,7 +174,6 @@ const LandingPage: React.FC = () => {
                       </h2>
                     )}
                  </div>
-                 
                  <div className="inline-block bg-[#f6c83e] text-[#269f78] px-6 py-2 rounded-full font-black text-xl md:text-3xl mt-4 rotate-[-2deg] shadow-lg border-2 border-white">
                    20 ANOS
                  </div>
@@ -178,7 +183,7 @@ const LandingPage: React.FC = () => {
 
              <div className="w-full aspect-[4/5] md:aspect-[2.5/1] overflow-hidden rounded-[2.5rem] md:rounded-[4rem] shadow-2xl border-4 md:border-8 border-white mb-16 transform rotate-[1deg]">
                {settings?.heroBannerUrl ? (
-                 <img src={settings.heroBannerUrl} className="w-full h-full object-cover object-center" alt="Samba Brasil 20 Anos" />
+                 <img src={settings.heroBannerUrl} className="w-full h-full object-cover object-center" alt="Samba Brasil" />
                ) : (
                  <div className="w-full h-full bg-[#f37f3a]/20 animate-pulse flex items-center justify-center">
                     <span className="text-[#f37f3a] font-bold">Banner Principal</span>
@@ -198,12 +203,20 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Seção de Formulário */}
+      {/* Form Section com Contador Real-time */}
       <section className="pt-20 pb-12 px-6">
         <div className="container mx-auto flex justify-center max-w-7xl">
           <div className="w-full max-w-md">
             <div className="bg-white p-8 md:p-12 rounded-[3.5rem] md:rounded-[4rem] shadow-[0_32px_0_rgba(38,159,120,0.1)] border-4 border-[#269f78] relative overflow-hidden">
-              <h4 className="text-3xl font-black text-[#269f78] mb-10 uppercase tracking-tighter italic leading-none text-center">Lista para pré-venda</h4>
+              <h4 className="text-3xl font-black text-[#269f78] mb-2 uppercase tracking-tighter italic leading-none text-center">Lista para pré-venda</h4>
+              
+              {/* Contador de Prova Social */}
+              <div className="flex items-center justify-center gap-2 mb-8 bg-[#f37f3a]/10 py-2 px-4 rounded-full w-fit mx-auto animate-pulse">
+                <Flame className="w-4 h-4 text-[#f37f3a] fill-[#f37f3a]" />
+                <span className="text-[#f37f3a] font-black text-[10px] uppercase tracking-widest">
+                  {leadCount > 0 ? `+${leadCount} pessoas já cadastradas` : 'Inscrições abertas'}
+                </span>
+              </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-1">
@@ -257,7 +270,7 @@ const LandingPage: React.FC = () => {
 
                 <button 
                   disabled={loading}
-                  className="w-full bg-[#f37f3a] hover:bg-[#d86b2b] text-white font-black py-6 rounded-3xl shadow-xl shadow-orange-500/30 transform active:scale-95 transition-all uppercase tracking-widest mt-6 border-b-8 border-orange-800"
+                  className="w-full bg-[#f37f3a] hover:bg-[#d86b2b] text-white font-black py-6 rounded-3xl shadow-xl shadow-orange-500/30 transform active:scale-95 transition-all uppercase tracking-widest mt-4 border-b-8 border-orange-800"
                 >
                   {loading ? 'AGUARDE...' : 'Cadastrar na pré-venda'}
                 </button>
@@ -306,7 +319,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Gallery Section */}
       <PhotoCarousel />
 
       <footer className="bg-[#269f78] text-white py-24 px-6 relative overflow-hidden">

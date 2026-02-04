@@ -12,7 +12,7 @@ import {
   Ticket, 
   Instagram, 
   Youtube,
-  Music,
+  Tiktok,
   Flame
 } from 'lucide-react';
 
@@ -326,7 +326,7 @@ const LandingPage: React.FC = () => {
             <div className="flex flex-col items-center md:items-end gap-6">
               <div className="flex gap-8">
                 <a href={settings?.instagramUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="Instagram"><Instagram size={24} /></a>
-                <a href={settings?.tiktokUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="TikTok"><Music size={24} /></a>
+                <a href={settings?.tiktokUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="TikTok"><Tiktok size={24} /></a>
                 <a href={settings?.youtubeUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="YouTube"><Youtube size={24} /></a>
               </div>
             </div>

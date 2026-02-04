@@ -22,7 +22,7 @@ import {
   Flame,
   Instagram,
   Youtube,
-  Music
+  Tiktok
 } from 'lucide-react';
 
 const AdminPanel: React.FC = () => {
@@ -465,7 +465,7 @@ const AdminPanel: React.FC = () => {
                             <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.instagramUrl} onChange={e => setSettings({...settings, instagramUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-1"><Music size={12}/> TikTok (Link)</label>
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-1"><Tiktok size={12}/> TikTok (Link)</label>
                             <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.tiktokUrl} onChange={e => setSettings({...settings, tiktokUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">

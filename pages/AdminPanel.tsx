@@ -102,13 +102,8 @@ const AdminPanel: React.FC = () => {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
-          
-          // Se for PNG, preserva a transparência exportando como PNG
-          // Caso contrário, usa JPEG para comprimir melhor
           const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-          
           ctx?.drawImage(img, 0, 0, width, height);
-          
           const dataUrl = canvas.toDataURL(outputType, outputType === 'image/jpeg' ? 0.7 : undefined);
           resolve(dataUrl);
         };
@@ -153,7 +148,6 @@ const AdminPanel: React.FC = () => {
     if (!file) return;
     try {
       setIsUploading(true);
-      // Logos costumam ser menores, então 800px é suficiente
       const compressedBase64 = await compressImage(file, 800);
       setSettings(prev => ({ ...prev, logoUrl: compressedBase64 }));
     } catch (err) {
@@ -249,7 +243,7 @@ const AdminPanel: React.FC = () => {
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
-            <button type="submit" className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-900">
+            <button type="submit" className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-950">
               ENTRAR NO PAINEL
             </button>
           </div>
@@ -260,7 +254,6 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f1e1] flex relative transition-all duration-300">
-      {/* Botão de abrir menu (quando fechado) */}
       {!isSidebarVisible && (
         <button 
           onClick={() => setIsSidebarVisible(true)}
@@ -271,26 +264,26 @@ const AdminPanel: React.FC = () => {
         </button>
       )}
 
-      {/* Sidebar Admin */}
       <aside className={`w-72 bg-[#269f78] text-white flex flex-col fixed h-full shadow-2xl z-40 transition-transform duration-300 ease-in-out ${isSidebarVisible ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10 flex justify-between items-start">
           <h1 className="text-2xl font-black uppercase italic tracking-tighter leading-tight">SAMBA <span className="text-[#f6c83e] block text-[10px] not-italic tracking-[0.3em] mt-1 opacity-80">ADMIN D&E MUSIC</span></h1>
           <button 
             onClick={() => setIsSidebarVisible(false)}
             className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all md:block hidden"
-            title="Recolher Menu"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
         </div>
         
         <nav className="flex-1 px-6 space-y-4 overflow-y-auto pb-8">
-          <button 
-            onClick={() => window.location.hash = '/'} 
+          <a 
+            href="#/" 
+            target="_blank" 
+            rel="noopener noreferrer"
             className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-black text-[10px] uppercase tracking-widest transition-all mb-4 border border-white/20"
           >
-            <ExternalLink className="w-4 h-4" /> Voltar ao Site
-          </button>
+            <ExternalLink className="w-4 h-4" /> Abrir Site
+          </a>
           {[
             { id: 'leads', icon: Users, label: 'Inscritos' },
             { id: 'photos', icon: ImageIcon, label: 'Galeria' },
@@ -313,23 +306,36 @@ const AdminPanel: React.FC = () => {
         </div>
       </aside>
 
-      {/* Overlay para mobile quando o menu estiver aberto */}
       {isSidebarVisible && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-30 md:hidden"
-          onClick={() => setIsSidebarVisible(false)}
-        />
+        <div className="fixed inset-0 bg-black/20 z-30 md:hidden" onClick={() => setIsSidebarVisible(false)} />
       )}
 
       <main className={`flex-1 p-6 md:p-12 transition-all duration-300 ${isSidebarVisible ? 'ml-72' : 'ml-0 pt-24'}`}>
         <div className="max-w-5xl mx-auto">
+          
+          {/* Header de Seção com Link do Site */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">
+                {activeTab === 'leads' && 'Inscritos'}
+                {activeTab === 'photos' && 'Galeria de Fotos'}
+                {activeTab === 'settings' && 'Identidade Visual'}
+                {activeTab === 'marketing' && 'Marketing & Conversão'}
+              </h2>
+              <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Controle Administrativo Samba Brasil</p>
+            </div>
+            <a 
+              href="#/" 
+              target="_blank" 
+              className="flex items-center gap-2 text-[#269f78] hover:text-[#f37f3a] transition-all font-black text-[10px] uppercase tracking-[0.2em] bg-white px-5 py-3 rounded-full shadow-sm border border-gray-100"
+            >
+              Ver Site Ao Vivo <ExternalLink size={14} />
+            </a>
+          </div>
+
           {activeTab === 'leads' && (
             <div className="space-y-8 animate-in fade-in">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                <div>
-                  <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Inscritos</h2>
-                  <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Base de dados para pré-venda</p>
-                </div>
+              <div className="flex justify-end">
                 <button onClick={exportLeads} className="bg-[#f37f3a] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#d86b2b] transition-all shadow-lg border-b-4 border-orange-800">
                   <Download className="w-4 h-4" /> Exportar Planilha
                 </button>
@@ -379,7 +385,6 @@ const AdminPanel: React.FC = () => {
 
           {activeTab === 'photos' && (
             <div className="space-y-12 animate-in fade-in">
-              <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Galeria de Fotos</h2>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border-2 border-white h-fit">
                    <h3 className="text-sm font-black text-[#269f78] mb-6 uppercase tracking-widest flex items-center gap-2"><Plus className="w-4 h-4" /> Adicionar Mídia</h3>
@@ -412,7 +417,6 @@ const AdminPanel: React.FC = () => {
 
           {activeTab === 'settings' && (
             <div className="space-y-12 animate-in fade-in">
-               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Identidade Visual</h2>
                <div className="bg-white p-6 md:p-10 rounded-[3rem] shadow-sm border-4 border-white">
                  <form onSubmit={handleSaveSettings} className="space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -428,11 +432,11 @@ const AdminPanel: React.FC = () => {
                         
                         <div className="space-y-8">
                           <div className="space-y-2">
-                              <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Título do Evento</label>
+                              <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Título do Evento</label>
                               <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-black text-[#269f78] uppercase outline-none" value={settings.eventName} onChange={e => setSettings({...settings, eventName: e.target.value})} />
                           </div>
                           <div className="space-y-2">
-                              <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Data para Exibição</label>
+                              <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Data para Exibição</label>
                               <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.eventDateDisplay} onChange={e => setSettings({...settings, eventDateDisplay: e.target.value})} />
                           </div>
                         </div>
@@ -490,7 +494,6 @@ const AdminPanel: React.FC = () => {
 
           {activeTab === 'marketing' && (
             <div className="space-y-12 animate-in fade-in">
-               <h2 className="text-4xl font-black text-[#269f78] uppercase italic tracking-tighter">Marketing & Conversão</h2>
                <div className="bg-white p-6 md:p-10 rounded-[3rem] shadow-sm border-4 border-white">
                  <form onSubmit={handleSaveSettings} className="space-y-8">
                     <div className="bg-[#269f78]/5 p-6 rounded-3xl border border-[#269f78]/10">

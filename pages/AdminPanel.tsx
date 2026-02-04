@@ -102,11 +102,19 @@ const AdminPanel: React.FC = () => {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+          
+          // Se for PNG, preserva a transparência exportando como PNG
+          // Caso contrário, usa JPEG para comprimir melhor
+          const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          
           ctx?.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          
+          const dataUrl = canvas.toDataURL(outputType, outputType === 'image/jpeg' ? 0.7 : undefined);
           resolve(dataUrl);
         };
+        img.onerror = (err) => reject(err);
       };
+      reader.onerror = (err) => reject(err);
     });
   };
 
@@ -145,6 +153,7 @@ const AdminPanel: React.FC = () => {
     if (!file) return;
     try {
       setIsUploading(true);
+      // Logos costumam ser menores, então 800px é suficiente
       const compressedBase64 = await compressImage(file, 800);
       setSettings(prev => ({ ...prev, logoUrl: compressedBase64 }));
     } catch (err) {

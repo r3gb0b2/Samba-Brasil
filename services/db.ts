@@ -40,16 +40,28 @@ export const dbService = {
       const docRef = doc(db, SETTINGS_COLLECTION, GLOBAL_SETTINGS_ID);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        return docSnap.data() as SiteSettings;
+        const data = docSnap.data() as SiteSettings;
+        return {
+          ...data,
+          instagramUrl: data.instagramUrl || '#',
+          facebookUrl: data.facebookUrl || '#',
+          tiktokUrl: data.tiktokUrl || '#'
+        };
       }
       return {
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
-        eventName: 'Samba Brasil Fortaleza 2026'
+        eventName: 'Samba Brasil Fortaleza 2026',
+        instagramUrl: '#',
+        facebookUrl: '#',
+        tiktokUrl: '#'
       };
     } catch (error) {
       return {
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
-        eventName: 'Samba Brasil Fortaleza 2026'
+        eventName: 'Samba Brasil Fortaleza 2026',
+        instagramUrl: '#',
+        facebookUrl: '#',
+        tiktokUrl: '#'
       };
     }
   },

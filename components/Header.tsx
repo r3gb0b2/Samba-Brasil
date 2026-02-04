@@ -1,7 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 
 const Header: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <header className="absolute top-0 left-0 w-full z-50 py-6 px-4 md:px-12">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -17,7 +20,8 @@ const Header: React.FC = () => {
           </div>
         </div>
         
-        <nav className="flex gap-4">
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex gap-4">
           <a 
             href="#admin" 
             onClick={(e) => { e.preventDefault(); window.location.hash = '/admin'; }} 
@@ -26,7 +30,36 @@ const Header: React.FC = () => {
             Painel Admin
           </a>
         </nav>
+
+        {/* Mobile Toggle */}
+        <button 
+          className="md:hidden bg-[#269f78] text-white p-2 rounded-xl shadow-lg border-2 border-white"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {/* Mobile Menu Content */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-[#f4f1e1] border-b-4 border-[#269f78] p-6 shadow-2xl animate-in slide-in-from-top duration-300">
+           <nav className="flex flex-col gap-4">
+             <a 
+              href="#admin" 
+              onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); window.location.hash = '/admin'; }} 
+              className="bg-[#269f78] text-white px-6 py-4 rounded-2xl font-black text-center uppercase tracking-widest"
+            >
+              Acessar Painel Admin
+            </a>
+            <button 
+              onClick={() => setIsMenuOpen(false)}
+              className="text-[#269f78] font-black text-xs uppercase tracking-widest py-2"
+            >
+              Fechar Menu
+            </button>
+           </nav>
+        </div>
+      )}
     </header>
   );
 };

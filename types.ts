@@ -17,6 +17,9 @@ export interface Photo {
 export interface SiteSettings {
   heroBannerUrl: string;
   eventName: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+  tiktokUrl?: string;
 }
 
 export interface AdminStats {

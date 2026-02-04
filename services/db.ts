@@ -35,7 +35,6 @@ const SETTINGS_COLLECTION = 'settings';
 const GLOBAL_SETTINGS_ID = 'global';
 
 export const dbService = {
-  // --- SETTINGS ---
   async getSettings(): Promise<SiteSettings> {
     try {
       const docRef = doc(db, SETTINGS_COLLECTION, GLOBAL_SETTINGS_ID);
@@ -43,13 +42,11 @@ export const dbService = {
       if (docSnap.exists()) {
         return docSnap.data() as SiteSettings;
       }
-      // Defaults
       return {
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
         eventName: 'Samba Brasil Fortaleza 2026'
       };
     } catch (error) {
-      console.error("Erro ao buscar configurações:", error);
       return {
         heroBannerUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=2000',
         eventName: 'Samba Brasil Fortaleza 2026'
@@ -57,16 +54,17 @@ export const dbService = {
     }
   },
 
-  async updateSettings(settings: Partial<SiteSettings>): Promise<void> {
+  async updateSettings(settings: Partial<SiteSettings>): Promise<{success: boolean, error?: string}> {
     try {
       const docRef = doc(db, SETTINGS_COLLECTION, GLOBAL_SETTINGS_ID);
       await setDoc(docRef, settings, { merge: true });
-    } catch (error) {
-      console.error("Erro ao atualizar configurações:", error);
+      return { success: true };
+    } catch (error: any) {
+      console.error("Erro ao salvar:", error);
+      return { success: false, error: error.message };
     }
   },
 
-  // --- LEADS ---
   async getLeads(): Promise<Lead[]> {
     try {
       const q = query(collection(db, LEADS_COLLECTION), orderBy('createdAt', 'desc'));
@@ -76,7 +74,6 @@ export const dbService = {
         ...doc.data()
       })) as Lead[];
     } catch (error) {
-      console.error("Erro ao buscar leads no Firestore:", error);
       return [];
     }
   },
@@ -85,35 +82,28 @@ export const dbService = {
     try {
       const q = query(collection(db, LEADS_COLLECTION), where("email", "==", lead.email.toLowerCase()));
       const querySnapshot = await getDocs(q);
-      
       if (!querySnapshot.empty) {
         return { success: false, message: 'Este e-mail já está cadastrado!' };
       }
-
       await addDoc(collection(db, LEADS_COLLECTION), {
         ...lead,
         email: lead.email.toLowerCase(),
         createdAt: Date.now()
       });
-
-      return { success: true, message: 'Cadastro realizado com sucesso! Prepare seu samba.' };
+      return { success: true, message: 'Cadastro realizado com sucesso!' };
     } catch (error) {
-      console.error("Erro ao adicionar lead:", error);
       return { success: false, message: 'Erro ao conectar com o banco de dados.' };
     }
   },
 
-  // --- PHOTOS ---
   async getPhotos(): Promise<Photo[]> {
     try {
       const querySnapshot = await getDocs(collection(db, PHOTOS_COLLECTION));
-      const photos = querySnapshot.docs.map(doc => ({
+      return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Photo[];
-      return photos;
     } catch (error) {
-      console.error("Erro ao buscar fotos:", error);
       return [];
     }
   },
@@ -121,17 +111,13 @@ export const dbService = {
   async addPhoto(url: string, title: string): Promise<void> {
     try {
       await addDoc(collection(db, PHOTOS_COLLECTION), { url, title, active: true, createdAt: Date.now() });
-    } catch (error) {
-      console.error("Erro ao adicionar foto:", error);
-    }
+    } catch (error) {}
   },
 
   async deletePhoto(id: string): Promise<void> {
     try {
       await deleteDoc(doc(db, PHOTOS_COLLECTION, id));
-    } catch (error) {
-      console.error("Erro ao deletar foto:", error);
-    }
+    } catch (error) {}
   },
 
   async togglePhotoStatus(id: string): Promise<void> {
@@ -141,8 +127,6 @@ export const dbService = {
       if (photoSnap.exists()) {
         await updateDoc(photoRef, { active: !photoSnap.data().active });
       }
-    } catch (error) {
-      console.error("Erro ao alterar status da foto:", error);
-    }
+    } catch (error) {}
   }
 };

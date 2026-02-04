@@ -17,7 +17,8 @@ import {
   Save,
   CheckCircle2,
   Upload,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 
 const AdminPanel: React.FC = () => {
@@ -29,7 +30,7 @@ const AdminPanel: React.FC = () => {
   const [newPhoto, setNewPhoto] = useState({ url: '', title: '' });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
-  const [saveStatus, setSaveStatus] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,6 +56,39 @@ const AdminPanel: React.FC = () => {
     if (isLoggedIn) loadData();
   }, [isLoggedIn]);
 
+  // Função para comprimir imagem e garantir que caiba no Firestore (< 1MB)
+  const compressImage = (file: File, maxWidth: number = 1920): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = (maxWidth * height) / width;
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Exportar como JPEG com 70% de qualidade para reduzir peso
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(dataUrl);
+        };
+        img.onerror = (e) => reject(e);
+      };
+      reader.onerror = (e) => reject(e);
+    });
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'samba2026') {
@@ -71,24 +105,15 @@ const AdminPanel: React.FC = () => {
     window.location.hash = '/';
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
-  };
-
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       setIsUploading(true);
-      const base64 = await fileToBase64(file);
-      setSettings({ ...settings, heroBannerUrl: base64 });
+      const compressedBase64 = await compressImage(file, 1920);
+      setSettings(prev => ({ ...prev, heroBannerUrl: compressedBase64 }));
     } catch (err) {
-      alert("Erro ao processar imagem.");
+      alert("Erro ao processar imagem. Tente uma foto menor.");
     } finally {
       setIsUploading(false);
     }
@@ -99,8 +124,8 @@ const AdminPanel: React.FC = () => {
     if (!file) return;
     try {
       setIsUploading(true);
-      const base64 = await fileToBase64(file);
-      setNewPhoto({ ...newPhoto, url: base64 });
+      const compressedBase64 = await compressImage(file, 1080);
+      setNewPhoto(prev => ({ ...prev, url: compressedBase64 }));
     } catch (err) {
       alert("Erro ao processar imagem.");
     } finally {
@@ -110,9 +135,20 @@ const AdminPanel: React.FC = () => {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dbService.updateSettings(settings);
-    setSaveStatus(true);
-    setTimeout(() => setSaveStatus(false), 3000);
+    setSaveStatus('saving');
+    try {
+      const result = await dbService.updateSettings(settings);
+      if (result.success) {
+        setSaveStatus('success');
+      } else {
+        setSaveStatus('error');
+        alert("Erro ao salvar no banco de dados. A imagem pode ser muito grande.");
+      }
+    } catch (err) {
+      setSaveStatus('error');
+    } finally {
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
   };
 
   const handleAddPhoto = async (e: React.FormEvent) => {
@@ -172,11 +208,8 @@ const AdminPanel: React.FC = () => {
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
-            <button className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-900">
+            <button type="submit" className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-900">
               ACESSAR PAINEL
-            </button>
-            <button type="button" onClick={() => window.location.hash = '/'} className="w-full text-gray-400 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-              <ArrowLeft className="w-4 h-4" /> Voltar ao Site
             </button>
           </div>
         </form>
@@ -281,17 +314,22 @@ const AdminPanel: React.FC = () => {
                    <div className="space-y-6">
                       <div className="relative group">
                         <div className="w-full aspect-[3/4] rounded-2xl border-4 border-dashed border-gray-100 flex flex-col items-center justify-center bg-gray-50 overflow-hidden">
-                           {newPhoto.url ? (
+                           {isUploading ? (
+                             <div className="flex flex-col items-center">
+                               <Loader2 className="w-8 h-8 animate-spin text-[#269f78]" />
+                               <p className="text-[10px] font-black mt-2 text-[#269f78]">COMPRIMINDO...</p>
+                             </div>
+                           ) : newPhoto.url ? (
                              <img src={newPhoto.url} className="w-full h-full object-cover" alt="Preview" />
                            ) : (
                              <>
                                <ImageIcon className="w-10 h-10 text-gray-200 mb-2" />
-                               <p className="text-[10px] font-black text-gray-300 uppercase">Sugestão: 800 x 1000px</p>
+                               <p className="text-[10px] font-black text-gray-300 uppercase text-center px-4">Sugestão: 1080 x 1350px (Vertical)</p>
                              </>
                            )}
                         </div>
                         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
-                        <button onClick={() => fileInputRef.current?.click()} className="mt-4 w-full bg-[#7db5d9] text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#6ca8cc] transition-all">Selecionar Arquivo</button>
+                        <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-4 w-full bg-[#7db5d9] text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#6ca8cc] transition-all">Selecionar Arquivo</button>
                       </div>
                       <input 
                         type="text" 
@@ -341,6 +379,12 @@ const AdminPanel: React.FC = () => {
                     <div className="space-y-4">
                       <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Banner Principal (Horizontal)</label>
                       <div className="w-full aspect-[21/9] rounded-2xl bg-[#f4f1e1] border-4 border-dashed border-gray-200 overflow-hidden relative group">
+                        {isUploading ? (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50">
+                            <Loader2 className="w-10 h-10 animate-spin text-[#269f78]" />
+                            <p className="text-[10px] font-black mt-2 text-[#269f78]">OTIMIZANDO IMAGEM...</p>
+                          </div>
+                        ) : null}
                         {settings.heroBannerUrl ? (
                           <img src={settings.heroBannerUrl} className="w-full h-full object-cover" alt="Preview" />
                         ) : (
@@ -352,14 +396,32 @@ const AdminPanel: React.FC = () => {
                       </div>
                       <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
                       <div className="flex items-start gap-3 bg-blue-50 p-4 rounded-xl text-[10px] font-bold text-blue-600 uppercase tracking-widest">
-                        <AlertCircle className="w-4 h-4 shrink-0" /> Ideal: 1920x600 pixels para preenchimento total.
+                        <AlertCircle className="w-4 h-4 shrink-0" /> Ideal: 1920x600 pixels. O sistema comprimirá automaticamente para caber no banco de dados.
                       </div>
                     </div>
 
-                    <button disabled={isUploading} className="w-full bg-[#269f78] text-white py-6 rounded-2xl font-black uppercase tracking-widest border-b-8 border-[#1e7e5f] shadow-2xl active:translate-y-1 active:border-b-4 transition-all">
-                      {isUploading ? "PROCESSANDO ARQUIVO..." : "SALVAR ALTERAÇÕES"}
+                    <button 
+                      type="submit"
+                      disabled={isUploading || saveStatus === 'saving'} 
+                      className="w-full bg-[#269f78] text-white py-6 rounded-2xl font-black uppercase tracking-widest border-b-8 border-[#1e7e5f] shadow-2xl active:translate-y-1 active:border-b-4 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                    >
+                      {saveStatus === 'saving' ? (
+                        <> <Loader2 className="w-5 h-5 animate-spin" /> SALVANDO...</>
+                      ) : (
+                        <><Save className="w-5 h-5" /> SALVAR ALTERAÇÕES</>
+                      )}
                     </button>
-                    {saveStatus && <p className="text-center text-green-600 font-black text-[10px] uppercase animate-pulse">Configurações salvas com sucesso!</p>}
+                    
+                    {saveStatus === 'success' && (
+                      <div className="flex items-center justify-center gap-2 text-green-600 font-black text-[10px] uppercase animate-in fade-in slide-in-from-top-2">
+                        <CheckCircle2 className="w-5 h-5" /> Alterações salvas com sucesso!
+                      </div>
+                    )}
+                    {saveStatus === 'error' && (
+                      <div className="flex items-center justify-center gap-2 text-red-600 font-black text-[10px] uppercase animate-in fade-in slide-in-from-top-2">
+                        <AlertCircle className="w-5 h-5" /> Erro ao salvar. Tente novamente.
+                      </div>
+                    )}
                  </form>
                </div>
             </div>

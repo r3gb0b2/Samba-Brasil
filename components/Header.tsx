@@ -20,17 +20,6 @@ const Header: React.FC = () => {
           </div>
         </div>
         
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex gap-4">
-          <a 
-            href="#admin" 
-            onClick={(e) => { e.preventDefault(); window.location.hash = '/admin'; }} 
-            className="bg-[#269f78] hover:bg-[#1e7e5f] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-[0_4px_0_rgba(0,0,0,0.1)] active:translate-y-1"
-          >
-            Painel Admin
-          </a>
-        </nav>
-
         {/* Mobile Toggle */}
         <button 
           className="md:hidden bg-[#269f78] text-white p-2 rounded-xl shadow-lg border-2 border-white"
@@ -43,17 +32,11 @@ const Header: React.FC = () => {
       {/* Mobile Menu Content */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-[#f4f1e1] border-b-4 border-[#269f78] p-6 shadow-2xl animate-in slide-in-from-top duration-300">
-           <nav className="flex flex-col gap-4">
-             <a 
-              href="#admin" 
-              onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); window.location.hash = '/admin'; }} 
-              className="bg-[#269f78] text-white px-6 py-4 rounded-2xl font-black text-center uppercase tracking-widest"
-            >
-              Acessar Painel Admin
-            </a>
+           <nav className="flex flex-col gap-4 text-center">
+            <p className="text-[#269f78] font-black text-sm uppercase tracking-widest mb-4">Samba Brasil 2026</p>
             <button 
               onClick={() => setIsMenuOpen(false)}
-              className="text-[#269f78] font-black text-xs uppercase tracking-widest py-2"
+              className="bg-[#269f78] text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest"
             >
               Fechar Menu
             </button>

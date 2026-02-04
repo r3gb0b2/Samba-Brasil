@@ -16,8 +16,8 @@ const PhotoCarousel: React.FC = () => {
 
   if (photos.length === 0) return null;
 
-  // Duplicar array para efeito infinito
-  const displayPhotos = [...photos, ...photos, ...photos];
+  // Duplicar array para efeito infinito fluido
+  const displayPhotos = [...photos, ...photos, ...photos, ...photos];
 
   return (
     <section id="galeria" className="py-20 bg-white overflow-hidden">
@@ -33,7 +33,7 @@ const PhotoCarousel: React.FC = () => {
           {displayPhotos.map((photo, index) => (
             <div 
               key={`${photo.id}-${index}`} 
-              className="min-w-[200px] md:min-w-[320px] h-[280px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 border-2 border-[#f4f1e1]"
+              className="min-w-[240px] md:min-w-[320px] h-[300px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 border-2 border-[#f4f1e1] flex-shrink-0"
             >
               <img 
                 src={photo.url} 

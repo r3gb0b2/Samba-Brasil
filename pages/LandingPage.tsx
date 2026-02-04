@@ -26,19 +26,22 @@ const LandingPage: React.FC = () => {
       
       // Injeção de Scripts de Marketing (Meta Pixel)
       if (s.facebookPixelId) {
-        (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-          if (f.fbq) return; n = f.fbq = function() {
-            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-          };
-          if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-          n.queue = []; t = b.createElement(e); t.async = !0;
-          t.src = v; s = b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t, s)
-        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        // Verifica se já existe o script para não duplicar
+        if (!window.fbq) {
+          (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+            if (f.fbq) return; n = f.fbq = function() {
+              n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+          })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
-        window.fbq('init', s.facebookPixelId);
-        window.fbq('track', 'PageView');
-        console.log("✅ Meta Pixel inicializado:", s.facebookPixelId);
+          window.fbq('init', s.facebookPixelId);
+          window.fbq('track', 'PageView');
+          console.log("✅ Meta Pixel inicializado e PageView disparado.");
+        }
       }
 
       // Scripts Customizados (GTM / Analytics)
@@ -113,15 +116,15 @@ const LandingPage: React.FC = () => {
       if (result.success) {
         setStatus({ type: 'success', message: result.message });
         
-        // Rastreamento de Lead no Meta
-        if (window.fbq) {
+        // Rastreamento de Lead no Meta (Verifica fbq novamente no momento do disparo)
+        if (typeof window.fbq === 'function') {
           window.fbq('track', 'Lead', {
             content_name: 'Inscrição Pré-venda Samba Brasil 20 Anos',
             status: 'success',
             value: 0,
             currency: 'BRL'
           });
-          console.log("🎯 Evento Lead disparado para o Meta.");
+          console.log("🎯 Evento Lead disparado com sucesso.");
         }
 
         setFormData({ name: '', email: '', phone: '', cpf: '' });
@@ -162,7 +165,6 @@ const LandingPage: React.FC = () => {
                </div>
              </div>
 
-             {/* Ajuste de Proporção: aspect-[4/3] no mobile para melhor visibilidade */}
              <div className="w-full aspect-[4/3] md:aspect-[2.5/1] overflow-hidden rounded-[2.5rem] md:rounded-[4rem] shadow-2xl border-4 md:border-8 border-white mb-16 transform rotate-[1deg]">
                {settings?.heroBannerUrl ? (
                  <img src={settings.heroBannerUrl} className="w-full h-full object-cover" alt="Samba Brasil 20 Anos" />
@@ -273,7 +275,8 @@ const LandingPage: React.FC = () => {
               <h3 className="text-5xl md:text-7xl font-black text-[#269f78] leading-[0.85] uppercase italic tracking-tighter">
                 A CAPITAL DO SAMBA <br/> <span className="text-[#f37f3a]">EM FESTA!</span>
               </h3>
-              <p className="text-gray-600 font-bold text-xl leading-relaxed max-w-2xl">
+              {/* CORREÇÃO: whitespace-pre-line para aceitar quebras de linha e espaços do banco */}
+              <p className="text-gray-600 font-bold text-xl leading-relaxed max-w-2xl whitespace-pre-line">
                 {settings?.eventDescription || 'Há duas décadas escrevendo a história do samba no Ceará. Prepare-se para a maior edição de todos os tempos.'}
               </p>
               

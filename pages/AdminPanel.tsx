@@ -21,9 +21,20 @@ import {
   ChevronLeft,
   Flame,
   Instagram,
-  Youtube,
-  Tiktok
+  Youtube
 } from 'lucide-react';
+
+const TikTokIcon = ({ size = 12 }: { size?: number }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.84-.6-4.13-1.32-.13 3.35-.07 6.7.02 10.05.02 1.55-.4 3.14-1.32 4.39-1.31 1.73-3.62 2.62-5.74 2.3-1.84-.23-3.6-1.45-4.46-3.13-.91-1.74-.82-3.95.22-5.61 1-1.55 2.87-2.5 4.73-2.43.34.01.68.04 1.01.1v4.11a3.17 3.17 0 0 0-1.83.69c-1.12.87-1.45 2.52-.77 3.82.52.99 1.68 1.61 2.8 1.51 1.15-.09 2.15-.99 2.45-2.1.15-.49.16-.99.15-1.5-.02-3.8-.02-7.61-.02-11.41-.01-4.74.01-9.48-.02-14.22Z" />
+  </svg>
+);
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'leads' | 'photos' | 'settings' | 'marketing'>('leads');
@@ -465,7 +476,7 @@ const AdminPanel: React.FC = () => {
                             <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.instagramUrl} onChange={e => setSettings({...settings, instagramUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-1"><Tiktok size={12}/> TikTok (Link)</label>
+                            <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-1 flex items-center"><TikTokIcon size={12}/> TikTok (Link)</label>
                             <input type="text" className="w-full px-6 py-4 bg-[#f4f1e1] rounded-2xl font-bold text-xs" value={settings.tiktokUrl} onChange={e => setSettings({...settings, tiktokUrl: e.target.value})} />
                         </div>
                         <div className="space-y-2">

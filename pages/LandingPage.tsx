@@ -12,9 +12,21 @@ import {
   Ticket, 
   Instagram, 
   Youtube,
-  Tiktok,
   Flame
 } from 'lucide-react';
+
+// Componente de Logo Oficial do TikTok para evitar confusão com ícone de música genérico
+const TikTokIcon = ({ size = 24 }: { size?: number }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.84-.6-4.13-1.32-.13 3.35-.07 6.7.02 10.05.02 1.55-.4 3.14-1.32 4.39-1.31 1.73-3.62 2.62-5.74 2.3-1.84-.23-3.6-1.45-4.46-3.13-.91-1.74-.82-3.95.22-5.61 1-1.55 2.87-2.5 4.73-2.43.34.01.68.04 1.01.1v4.11a3.17 3.17 0 0 0-1.83.69c-1.12.87-1.45 2.52-.77 3.82.52.99 1.68 1.61 2.8 1.51 1.15-.09 2.15-.99 2.45-2.1.15-.49.16-.99.15-1.5-.02-3.8-.02-7.61-.02-11.41-.01-4.74.01-9.48-.02-14.22Z" />
+  </svg>
+);
 
 declare global {
   interface Window {
@@ -326,7 +338,7 @@ const LandingPage: React.FC = () => {
             <div className="flex flex-col items-center md:items-end gap-6">
               <div className="flex gap-8">
                 <a href={settings?.instagramUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="Instagram"><Instagram size={24} /></a>
-                <a href={settings?.tiktokUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="TikTok"><Tiktok size={24} /></a>
+                <a href={settings?.tiktokUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all flex items-center justify-center" title="TikTok"><TikTokIcon size={24} /></a>
                 <a href={settings?.youtubeUrl} target="_blank" rel="noreferrer" className="bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all" title="YouTube"><Youtube size={24} /></a>
               </div>
             </div>

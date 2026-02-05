@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { dbService } from '../services/db';
 import { Photo } from '../types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PhotoCarousel: React.FC = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const loadPhotos = async () => {
@@ -16,8 +18,13 @@ const PhotoCarousel: React.FC = () => {
 
   if (photos.length === 0) return null;
 
-  // Duplicar array para efeito infinito fluido
-  const displayPhotos = [...photos, ...photos, ...photos, ...photos];
+  const next = () => {
+    setCurrentIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  const prev = () => {
+    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  };
 
   return (
     <section id="galeria" className="py-20 bg-white overflow-hidden">
@@ -28,21 +35,68 @@ const PhotoCarousel: React.FC = () => {
         <div className="w-16 h-1.5 bg-[#f6c83e] mx-auto mt-4 rounded-full"></div>
       </div>
 
-      <div className="relative">
-        <div className="flex animate-scroll gap-4 md:gap-8 px-4">
-          {displayPhotos.map((photo, index) => (
-            <div 
-              key={`${photo.id}-${index}`} 
-              className="min-w-[240px] md:min-w-[320px] h-[300px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 border-2 border-[#f4f1e1] flex-shrink-0"
-            >
-              <img 
-                src={photo.url} 
-                alt={photo.title} 
-                className="w-full h-full object-cover object-center"
-                loading="lazy"
-              />
+      <div className="relative max-w-6xl mx-auto px-4">
+        {/* Container do Slider */}
+        <div className="relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] shadow-2xl border-4 md:border-8 border-[#f4f1e1]">
+          <div 
+            className="flex transition-transform duration-700 ease-in-out" 
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          >
+            {photos.map((photo) => (
+              <div 
+                key={photo.id} 
+                className="w-full flex-shrink-0 aspect-[4/5] md:aspect-[16/9]"
+              >
+                <img 
+                  src={photo.url} 
+                  alt={photo.title} 
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Overlay de Gradiente */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+          
+          {/* Título da Foto */}
+          {photos[currentIndex].title && (
+            <div className="absolute bottom-8 left-8 right-8 text-white z-10">
+              <p className="font-black text-xl md:text-2xl uppercase italic drop-shadow-lg">
+                {photos[currentIndex].title}
+              </p>
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Botões de Navegação */}
+        <div className="flex justify-center items-center gap-6 mt-10">
+          <button 
+            onClick={prev}
+            className="bg-[#269f78] text-white p-4 rounded-full hover:bg-[#1e7e5f] transition-all shadow-xl active:scale-95 border-2 border-white"
+            aria-label="Foto Anterior"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          
+          <div className="flex gap-2">
+            {photos.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`h-3 rounded-full transition-all duration-300 ${currentIndex === idx ? 'w-8 bg-[#f37f3a]' : 'w-3 bg-gray-200'}`}
+              />
+            ))}
+          </div>
+
+          <button 
+            onClick={next}
+            className="bg-[#269f78] text-white p-4 rounded-full hover:bg-[#1e7e5f] transition-all shadow-xl active:scale-95 border-2 border-white"
+            aria-label="Próxima Foto"
+          >
+            <ChevronRight size={24} />
+          </button>
         </div>
       </div>
     </section>

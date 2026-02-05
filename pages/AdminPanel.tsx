@@ -24,7 +24,8 @@ import {
   Youtube,
   Tiktok,
   Smartphone,
-  Monitor
+  Monitor,
+  X
 } from 'lucide-react';
 
 const TikTokIcon = ({ size = 12 }: { size?: number }) => (
@@ -87,6 +88,11 @@ const AdminPanel: React.FC = () => {
   useEffect(() => {
     const session = localStorage.getItem('samba_admin_session');
     if (session === 'active') setIsLoggedIn(true);
+    
+    // Fechar menu automaticamente no mobile ao carregar
+    if (window.innerWidth < 768) {
+      setIsSidebarVisible(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -163,7 +169,6 @@ const AdminPanel: React.FC = () => {
     if (!file) return;
     try {
       setIsUploading(true);
-      // Banner mobile pode ser menor em largura (ex: 1080px) mas focado em verticalidade
       const compressedBase64 = await compressImage(file, 1080);
       setSettings(prev => ({ ...prev, mobileBannerUrl: compressedBase64 }));
     } catch (err) {
@@ -284,6 +289,7 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f1e1] flex relative transition-all duration-300">
+      {/* Botão de Abrir Menu - Flutuante quando fechado */}
       {!isSidebarVisible && (
         <button 
           onClick={() => setIsSidebarVisible(true)}
@@ -294,14 +300,23 @@ const AdminPanel: React.FC = () => {
         </button>
       )}
 
-      <aside className={`w-72 bg-[#269f78] text-white flex flex-col fixed h-full shadow-2xl z-40 transition-transform duration-300 ease-in-out ${isSidebarVisible ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Overlay para Mobile */}
+      {isSidebarVisible && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarVisible(false)}
+        />
+      )}
+
+      {/* Barra Lateral */}
+      <aside className={`w-72 bg-[#269f78] text-white flex flex-col fixed h-full shadow-2xl z-50 transition-transform duration-300 ease-in-out ${isSidebarVisible ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10 flex justify-between items-start">
           <h1 className="text-2xl font-black uppercase italic tracking-tighter leading-tight">SAMBA <span className="text-[#f6c83e] block text-[10px] not-italic tracking-[0.3em] mt-1 opacity-80">ADMIN D&E MUSIC</span></h1>
           <button 
             onClick={() => setIsSidebarVisible(false)}
-            className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all md:block hidden"
+            className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all"
           >
-            <ChevronLeft className="w-5 h-5" />
+            {window.innerWidth < 768 ? <X className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
         </div>
         
@@ -318,11 +333,14 @@ const AdminPanel: React.FC = () => {
             { id: 'leads', icon: Users, label: 'Inscritos' },
             { id: 'photos', icon: ImageIcon, label: 'Galeria' },
             { id: 'settings', icon: Settings, label: 'Visual & Site' },
-            { id: 'marketing', icon: Target, label: 'Marketing & Conversão' }
+            { id: 'marketing', icon: Target, label: 'Marketing & Meta' }
           ].map(item => (
             <button 
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => {
+                setActiveTab(item.id as any);
+                if (window.innerWidth < 768) setIsSidebarVisible(false);
+              }}
               className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-xs uppercase tracking-widest ${activeTab === item.id ? 'bg-[#1e7e5f] text-white shadow-lg border-b-4 border-green-950' : 'text-white/60 hover:text-white'}`}
             >
               <item.icon className="w-4 h-4" /> {item.label}
@@ -336,7 +354,10 @@ const AdminPanel: React.FC = () => {
         </div>
       </aside>
 
-      <main className={`flex-1 p-6 md:p-12 transition-all duration-300 ${isSidebarVisible ? 'ml-72' : 'ml-0 pt-24'}`}>
+      {/* Conteúdo Principal */}
+      <main 
+        className={`flex-1 p-6 md:p-12 transition-all duration-300 min-w-0 ${isSidebarVisible ? 'md:ml-72' : 'ml-0'} pt-24 md:pt-12`}
+      >
         <div className="max-w-5xl mx-auto">
           
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -356,13 +377,6 @@ const AdminPanel: React.FC = () => {
                 </div>
               </div>
             </div>
-            <a 
-              href="#/" 
-              target="_blank" 
-              className="flex items-center gap-2 text-[#269f78] hover:text-[#f37f3a] transition-all font-black text-[10px] uppercase tracking-[0.2em] bg-white px-5 py-3 rounded-full shadow-sm border border-gray-100"
-            >
-              Ver Site Ao Vivo <ExternalLink size={14} />
-            </a>
           </div>
 
           {activeTab === 'leads' && (

@@ -190,14 +190,26 @@ const LandingPage: React.FC = () => {
                </div>
              </div>
 
-             <div className="w-full aspect-[4/5] md:aspect-[2.5/1] overflow-hidden rounded-[2.5rem] md:rounded-[4rem] shadow-2xl border-4 md:border-8 border-white mb-16 transform rotate-[1deg]">
-               {settings?.heroBannerUrl ? (
-                 <img src={settings.heroBannerUrl} className="w-full h-full object-cover object-center" alt="Samba Brasil" />
-               ) : (
-                 <div className="w-full h-full bg-[#f37f3a]/20 animate-pulse flex items-center justify-center">
-                    <span className="text-[#f37f3a] font-bold">Banner Principal</span>
-                 </div>
-               )}
+             {/* Banner Responsivo */}
+             <div className="w-full relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] shadow-2xl border-4 md:border-8 border-white mb-16 transform rotate-[1deg]">
+                <picture className="w-full h-full">
+                  {/* Imagem para Mobile (até 768px) */}
+                  <source 
+                    media="(max-width: 768px)" 
+                    srcSet={settings?.mobileBannerUrl || settings?.heroBannerUrl} 
+                  />
+                  {/* Imagem para Desktop */}
+                  <img 
+                    src={settings?.heroBannerUrl} 
+                    className="w-full h-full object-cover object-center aspect-[4/5] md:aspect-[2.5/1]" 
+                    alt="Samba Brasil" 
+                  />
+                </picture>
+                {!settings?.heroBannerUrl && (
+                   <div className="absolute inset-0 bg-[#f37f3a]/20 animate-pulse flex items-center justify-center">
+                      <span className="text-[#f37f3a] font-bold">Aguardando Banner...</span>
+                   </div>
+                )}
              </div>
 
              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">

@@ -21,7 +21,10 @@ import {
   ChevronLeft,
   Flame,
   Instagram,
-  Youtube
+  Youtube,
+  Tiktok,
+  Smartphone,
+  Monitor
 } from 'lucide-react';
 
 const TikTokIcon = ({ size = 12 }: { size?: number }) => (
@@ -44,6 +47,7 @@ const AdminPanel: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings>({ 
     logoUrl: '',
     heroBannerUrl: '', 
+    mobileBannerUrl: '',
     eventName: '',
     eventDescription: '',
     eventDateDisplay: '',
@@ -66,6 +70,7 @@ const AdminPanel: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const mobileBannerInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   const loadData = async () => {
@@ -146,6 +151,21 @@ const AdminPanel: React.FC = () => {
       setIsUploading(true);
       const compressedBase64 = await compressImage(file, 1920);
       setSettings(prev => ({ ...prev, heroBannerUrl: compressedBase64 }));
+    } catch (err) {
+      alert("Erro ao processar imagem.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleMobileBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploading(true);
+      // Banner mobile pode ser menor em largura (ex: 1080px) mas focado em verticalidade
+      const compressedBase64 = await compressImage(file, 1080);
+      setSettings(prev => ({ ...prev, mobileBannerUrl: compressedBase64 }));
     } catch (err) {
       alert("Erro ao processar imagem.");
     } finally {
@@ -298,7 +318,7 @@ const AdminPanel: React.FC = () => {
             { id: 'leads', icon: Users, label: 'Inscritos' },
             { id: 'photos', icon: ImageIcon, label: 'Galeria' },
             { id: 'settings', icon: Settings, label: 'Visual & Site' },
-            { id: 'marketing', icon: Target, label: 'Marketing & Meta' }
+            { id: 'marketing', icon: Target, label: 'Marketing & Conversão' }
           ].map(item => (
             <button 
               key={item.id}
@@ -485,14 +505,39 @@ const AdminPanel: React.FC = () => {
                         </div>
                     </div>
                     
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2">Banner Principal</label>
-                      <div className="w-full aspect-[21/9] rounded-2xl bg-[#f4f1e1] border-4 border-dashed border-gray-200 overflow-hidden relative group">
-                        {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10"><Loader2 className="animate-spin text-[#269f78]" /></div>}
-                        {settings.heroBannerUrl ? <img src={settings.heroBannerUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 italic">Sem banner</div>}
-                        <button type="button" onClick={() => bannerInputRef.current?.click()} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-[#269f78] px-6 py-3 rounded-xl font-black text-[10px] uppercase opacity-0 group-hover:opacity-100 transition-opacity">Substituir Imagem</button>
+                    {/* Sessão de Banners com Gabaritos */}
+                    <div className="space-y-12 pt-8 border-t border-gray-100">
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <Monitor className="text-[#269f78]" />
+                          <h3 className="font-black text-[#269f78] uppercase text-xs tracking-widest">Banner Computador (Desktop)</h3>
+                        </div>
+                        <div className="p-4 bg-blue-50 border-l-4 border-[#7db5d9] text-[10px] font-bold text-[#1e3a8a] uppercase tracking-widest">
+                          📏 Gabarito Recomendado: 1920x800px (Proporção 21:9 ou 2.5:1)
+                        </div>
+                        <div className="w-full aspect-[21/9] rounded-2xl bg-[#f4f1e1] border-4 border-dashed border-gray-200 overflow-hidden relative group">
+                          {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10"><Loader2 className="animate-spin text-[#269f78]" /></div>}
+                          {settings.heroBannerUrl ? <img src={settings.heroBannerUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 italic">Sem banner desktop</div>}
+                          <button type="button" onClick={() => bannerInputRef.current?.click()} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-[#269f78] px-6 py-3 rounded-xl font-black text-[10px] uppercase opacity-0 group-hover:opacity-100 transition-opacity">Substituir Imagem</button>
+                        </div>
+                        <input type="file" ref={bannerInputRef} className="hidden" onChange={handleBannerUpload} />
                       </div>
-                      <input type="file" ref={bannerInputRef} className="hidden" onChange={handleBannerUpload} />
+
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <Smartphone className="text-[#f37f3a]" />
+                          <h3 className="font-black text-[#f37f3a] uppercase text-xs tracking-widest">Banner Celular (Mobile)</h3>
+                        </div>
+                        <div className="p-4 bg-orange-50 border-l-4 border-[#f37f3a] text-[10px] font-bold text-[#854d0e] uppercase tracking-widest">
+                          📏 Gabarito Recomendado: 1080x1350px (Proporção 4:5 - Formato Story/Post Vertical)
+                        </div>
+                        <div className="w-full max-w-[320px] mx-auto aspect-[4/5] rounded-2xl bg-[#f4f1e1] border-4 border-dashed border-gray-200 overflow-hidden relative group">
+                          {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10"><Loader2 className="animate-spin text-[#269f78]" /></div>}
+                          {settings.mobileBannerUrl ? <img src={settings.mobileBannerUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 italic">Sem banner mobile</div>}
+                          <button type="button" onClick={() => mobileBannerInputRef.current?.click()} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-[#f37f3a] px-6 py-3 rounded-xl font-black text-[10px] uppercase opacity-0 group-hover:opacity-100 transition-opacity text-center">Substituir Imagem Mobile</button>
+                        </div>
+                        <input type="file" ref={mobileBannerInputRef} className="hidden" onChange={handleMobileBannerUpload} />
+                      </div>
                     </div>
 
                     <button type="submit" disabled={isUploading || saveStatus === 'saving'} className="w-full bg-[#269f78] text-white py-6 rounded-2xl font-black uppercase tracking-widest border-b-8 border-[#1e7e5f] shadow-2xl active:translate-y-1 transition-all">

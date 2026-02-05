@@ -48,6 +48,8 @@ export const dbService = {
         return {
           ...data,
           logoUrl: data.logoUrl || '',
+          heroBannerUrl: data.heroBannerUrl || '',
+          mobileBannerUrl: data.mobileBannerUrl || '',
           eventDescription: data.eventDescription || '',
           eventDateDisplay: data.eventDateDisplay || '',
           eventDayBanner: data.eventDayBanner || '',

@@ -50,6 +50,7 @@ export const dbService = {
           logoUrl: data.logoUrl || '',
           heroBannerUrl: data.heroBannerUrl || '',
           mobileBannerUrl: data.mobileBannerUrl || '',
+          isRegistrationEnabled: data.isRegistrationEnabled !== undefined ? data.isRegistrationEnabled : true,
           eventDescription: data.eventDescription || '',
           eventDateDisplay: data.eventDateDisplay || '',
           eventDayBanner: data.eventDayBanner || '',
@@ -59,9 +60,9 @@ export const dbService = {
           tiktokUrl: data.tiktokUrl || '',
         };
       }
-      return {} as SiteSettings;
+      return { isRegistrationEnabled: true } as SiteSettings;
     } catch (error) {
-      return {} as SiteSettings;
+      return { isRegistrationEnabled: true } as SiteSettings;
     }
   },
 
@@ -88,7 +89,6 @@ export const dbService = {
     }
   },
 
-  // Sistema de Presença (Heartbeat)
   async updateUserPresence(sessionId: string) {
     try {
       const presenceRef = doc(db, PRESENCE_COLLECTION, sessionId);

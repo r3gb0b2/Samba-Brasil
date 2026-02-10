@@ -18,7 +18,8 @@ export interface Photo {
 export interface SiteSettings {
   logoUrl: string;
   heroBannerUrl: string;
-  mobileBannerUrl: string; // Novo campo para banner mobile
+  mobileBannerUrl: string;
+  isRegistrationEnabled: boolean; // Novo campo
   eventName: string;
   eventDescription: string;
   eventDateDisplay: string;

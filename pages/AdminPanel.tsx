@@ -19,13 +19,15 @@ import {
   Code,
   Menu as MenuIcon,
   ChevronLeft,
-  Flame,
   Instagram,
   Youtube,
-  Tiktok,
   Smartphone,
   Monitor,
-  X
+  X,
+  ToggleLeft,
+  ToggleRight,
+  ShieldCheck,
+  ShieldAlert
 } from 'lucide-react';
 
 const TikTokIcon = ({ size = 12 }: { size?: number }) => (
@@ -49,6 +51,7 @@ const AdminPanel: React.FC = () => {
     logoUrl: '',
     heroBannerUrl: '', 
     mobileBannerUrl: '',
+    isRegistrationEnabled: true,
     eventName: '',
     eventDescription: '',
     eventDateDisplay: '',
@@ -88,11 +91,7 @@ const AdminPanel: React.FC = () => {
   useEffect(() => {
     const session = localStorage.getItem('samba_admin_session');
     if (session === 'active') setIsLoggedIn(true);
-    
-    // Fechar menu automaticamente no mobile ao carregar
-    if (window.innerWidth < 768) {
-      setIsSidebarVisible(false);
-    }
+    if (window.innerWidth < 768) setIsSidebarVisible(false);
   }, []);
 
   useEffect(() => {
@@ -259,37 +258,8 @@ const AdminPanel: React.FC = () => {
     a.click();
   };
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-[#269f78] flex items-center justify-center p-4">
-        <form onSubmit={handleLogin} className="bg-[#f4f1e1] p-10 rounded-[3rem] shadow-2xl w-full max-w-sm border-4 border-white">
-          <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 bg-[#f37f3a] rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-              <Users className="text-white w-10 h-10" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-black text-[#269f78] text-center mb-8 uppercase italic tracking-tighter leading-none">Acesso Admin<br/><span className="text-[#f37f3a] text-sm not-italic">D&E MUSIC</span></h2>
-          <div className="space-y-6">
-            <input 
-              type="password" 
-              autoFocus
-              className="w-full px-5 py-4 rounded-2xl border-2 border-transparent bg-white focus:border-[#f37f3a] outline-none transition-all font-mono text-center"
-              placeholder="Digite a Senha"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-            <button type="submit" className="w-full bg-[#269f78] text-white font-black py-5 rounded-2xl hover:bg-[#1e7e5f] transition-all shadow-xl uppercase tracking-widest text-xs border-b-4 border-green-950">
-              ENTRAR NO PAINEL
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#f4f1e1] flex relative transition-all duration-300">
-      {/* Botão de Abrir Menu - Flutuante quando fechado */}
       {!isSidebarVisible && (
         <button 
           onClick={() => setIsSidebarVisible(true)}
@@ -300,7 +270,6 @@ const AdminPanel: React.FC = () => {
         </button>
       )}
 
-      {/* Overlay para Mobile */}
       {isSidebarVisible && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
@@ -308,7 +277,6 @@ const AdminPanel: React.FC = () => {
         />
       )}
 
-      {/* Barra Lateral */}
       <aside className={`w-72 bg-[#269f78] text-white flex flex-col fixed h-full shadow-2xl z-50 transition-transform duration-300 ease-in-out ${isSidebarVisible ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10 flex justify-between items-start">
           <h1 className="text-2xl font-black uppercase italic tracking-tighter leading-tight">SAMBA <span className="text-[#f6c83e] block text-[10px] not-italic tracking-[0.3em] mt-1 opacity-80">ADMIN D&E MUSIC</span></h1>
@@ -354,7 +322,6 @@ const AdminPanel: React.FC = () => {
         </div>
       </aside>
 
-      {/* Conteúdo Principal */}
       <main 
         className={`flex-1 p-6 md:p-12 transition-all duration-300 min-w-0 ${isSidebarVisible ? 'md:ml-72' : 'ml-0'} pt-24 md:pt-12`}
       >
@@ -465,6 +432,32 @@ const AdminPanel: React.FC = () => {
             <div className="space-y-12 animate-in fade-in">
                <div className="bg-white p-6 md:p-10 rounded-[3rem] shadow-sm border-4 border-white">
                  <form onSubmit={handleSaveSettings} className="space-y-10">
+                    
+                    {/* Controle de Status das Inscrições */}
+                    <div className="bg-[#f4f1e1]/50 p-8 rounded-[2.5rem] border-4 border-white shadow-inner flex flex-col md:flex-row items-center justify-between gap-6">
+                       <div className="flex items-center gap-4">
+                          <div className={`p-4 rounded-2xl ${settings.isRegistrationEnabled ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                             {settings.isRegistrationEnabled ? <ShieldCheck size={32} /> : <ShieldAlert size={32} />}
+                          </div>
+                          <div>
+                             <h4 className="text-sm font-black text-gray-800 uppercase tracking-widest">Status das Inscrições</h4>
+                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Controle a exibição do formulário de cadastro</p>
+                          </div>
+                       </div>
+                       
+                       <button 
+                         type="button"
+                         onClick={() => setSettings({...settings, isRegistrationEnabled: !settings.isRegistrationEnabled})}
+                         className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${settings.isRegistrationEnabled ? 'bg-green-500 text-white shadow-lg shadow-green-200 border-b-4 border-green-700' : 'bg-red-500 text-white shadow-lg shadow-red-200 border-b-4 border-red-700'}`}
+                       >
+                         {settings.isRegistrationEnabled ? (
+                           <>ATIVADAS <ToggleRight size={20} /></>
+                         ) : (
+                           <>DESATIVADAS <ToggleLeft size={20} /></>
+                         )}
+                       </button>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
                           <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-2 flex items-center gap-2">Logo do Evento</label>
@@ -519,7 +512,6 @@ const AdminPanel: React.FC = () => {
                         </div>
                     </div>
                     
-                    {/* Sessão de Banners com Gabaritos */}
                     <div className="space-y-12 pt-8 border-t border-gray-100">
                       <div className="space-y-6">
                         <div className="flex items-center gap-3">

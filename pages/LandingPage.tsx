@@ -12,10 +12,9 @@ import {
   Ticket, 
   Instagram, 
   Youtube,
-  Flame
+  Lock
 } from 'lucide-react';
 
-// Componente de Logo Oficial do TikTok para evitar confusão com ícone de música genérico
 const TikTokIcon = ({ size = 24 }: { size?: number }) => (
   <svg 
     width={size} 
@@ -127,6 +126,8 @@ const LandingPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (settings && !settings.isRegistrationEnabled) return;
+
     setLoading(true);
     setStatus({ type: null, message: '' });
 
@@ -193,12 +194,10 @@ const LandingPage: React.FC = () => {
              {/* Banner Responsivo */}
              <div className="w-full relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] shadow-2xl border-4 md:border-8 border-white mb-16 transform rotate-[1deg]">
                 <picture className="w-full h-full">
-                  {/* Imagem para Mobile (até 768px) */}
                   <source 
                     media="(max-width: 768px)" 
                     srcSet={settings?.mobileBannerUrl || settings?.heroBannerUrl} 
                   />
-                  {/* Imagem para Desktop */}
                   <img 
                     src={settings?.heroBannerUrl} 
                     className="w-full h-full object-cover object-center aspect-[4/5] md:aspect-[2.5/1]" 
@@ -231,63 +230,78 @@ const LandingPage: React.FC = () => {
             <div className="bg-white p-8 md:p-12 rounded-[3.5rem] md:rounded-[4rem] shadow-[0_32px_0_rgba(38,159,120,0.1)] border-4 border-[#269f78] relative overflow-hidden">
               <h4 className="text-3xl font-black text-[#269f78] mb-10 uppercase tracking-tighter italic leading-none text-center">Lista para pré-venda</h4>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">Seu Nome</label>
-                  <input 
-                    type="text" 
-                    required
-                    placeholder="Nome e Sobrenome"
-                    className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all text-sm md:text-base"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  />
-                </div>
-                
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">E-mail</label>
-                  <input 
-                    type="email" 
-                    required
-                    placeholder="email@exemplo.com"
-                    className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all text-sm md:text-base"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {settings && settings.isRegistrationEnabled ? (
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">WhatsApp</label>
-                    <input 
-                      type="tel" 
-                      required
-                      placeholder="(85) 9999-9999"
-                      className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all text-sm md:text-base"
-                      value={formData.phone}
-                      onChange={handlePhoneChange}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">CPF</label>
+                    <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">Seu Nome</label>
                     <input 
                       type="text" 
                       required
-                      placeholder="999.999.999-99"
+                      placeholder="Nome e Sobrenome"
                       className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all text-sm md:text-base"
-                      value={formData.cpf}
-                      onChange={handleCpfChange}
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
                     />
                   </div>
-                </div>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">E-mail</label>
+                    <input 
+                      type="email" 
+                      required
+                      placeholder="email@exemplo.com"
+                      className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all text-sm md:text-base"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    />
+                  </div>
 
-                <button 
-                  disabled={loading}
-                  className="w-full bg-[#f37f3a] hover:bg-[#d86b2b] text-white font-black py-6 rounded-3xl shadow-xl shadow-orange-500/30 transform active:scale-95 transition-all uppercase tracking-widest mt-6 border-b-8 border-orange-800"
-                >
-                  {loading ? 'AGUARDE...' : 'Cadastrar na pré-venda'}
-                </button>
-              </form>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">WhatsApp</label>
+                      <input 
+                        type="tel" 
+                        required
+                        placeholder="(85) 9999-9999"
+                        className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all text-sm md:text-base"
+                        value={formData.phone}
+                        onChange={handlePhoneChange}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-[#269f78] uppercase tracking-widest ml-3">CPF</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="999.999.999-99"
+                        className="w-full bg-[#f4f1e1] px-7 py-5 rounded-3xl border-2 border-transparent focus:border-[#f37f3a] outline-none font-bold text-gray-700 transition-all text-sm md:text-base"
+                        value={formData.cpf}
+                        onChange={handleCpfChange}
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    disabled={loading}
+                    className="w-full bg-[#f37f3a] hover:bg-[#d86b2b] text-white font-black py-6 rounded-3xl shadow-xl shadow-orange-500/30 transform active:scale-95 transition-all uppercase tracking-widest mt-6 border-b-8 border-orange-800"
+                  >
+                    {loading ? 'AGUARDE...' : 'Cadastrar na pré-venda'}
+                  </button>
+                </form>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 text-center animate-in fade-in zoom-in duration-500">
+                  <div className="bg-[#f4f1e1] p-6 rounded-full mb-6">
+                    <Lock size={48} className="text-[#269f78]" />
+                  </div>
+                  <h5 className="text-2xl font-black text-[#269f78] mb-4 uppercase italic">Inscrições Encerradas</h5>
+                  <p className="text-gray-500 font-bold text-sm leading-relaxed max-w-xs">
+                    As inscrições para a pré-venda estão temporariamente desativadas. Fique atento às nossas redes sociais para mais informações.
+                  </p>
+                  <div className="mt-8 flex gap-4">
+                     <a href={settings?.instagramUrl} target="_blank" className="bg-[#f37f3a] text-white p-3 rounded-full"><Instagram size={20} /></a>
+                  </div>
+                </div>
+              )}
 
               {status.type && (
                 <div className={`mt-8 p-5 rounded-[2rem] flex items-center gap-4 animate-bounce ${status.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

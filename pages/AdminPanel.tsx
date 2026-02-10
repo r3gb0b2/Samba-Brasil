@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { dbService } from '../services/db';
 import { Lead, Photo, SiteSettings } from '../types';
+import * as XLSX from 'xlsx';
 import { 
   Users, 
   Image as ImageIcon, 
@@ -246,16 +247,34 @@ const AdminPanel: React.FC = () => {
   );
 
   const exportLeads = () => {
-    const csv = [
-      ['ID', 'Nome', 'Email', 'Telefone', 'CPF', 'Data'],
-      ...leads.map(l => [l.id, l.name, l.email, l.phone, l.cpf, new Date(l.createdAt).toLocaleString()])
-    ].map(e => e.join(",")).join("\n");
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'inscritos_samba_brasil_20anos.csv';
-    a.click();
+    if (leads.length === 0) {
+      alert("Não há inscritos para exportar.");
+      return;
+    }
+
+    const data = leads.map(l => ({
+      'Nome': l.name,
+      'Email': l.email,
+      'Telefone': l.phone,
+      'CPF': l.cpf,
+      'Data de Inscrição': new Date(l.createdAt).toLocaleString('pt-BR')
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Inscritos");
+    
+    // Define a largura das colunas
+    const wscols = [
+      {wch: 30}, // Nome
+      {wch: 35}, // Email
+      {wch: 20}, // Telefone
+      {wch: 15}, // CPF
+      {wch: 20}, // Data
+    ];
+    worksheet['!cols'] = wscols;
+
+    XLSX.writeFile(workbook, `inscritos_samba_brasil_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
   };
 
   return (
@@ -350,7 +369,7 @@ const AdminPanel: React.FC = () => {
             <div className="space-y-8 animate-in fade-in">
               <div className="flex justify-end">
                 <button onClick={exportLeads} className="bg-[#f37f3a] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#d86b2b] transition-all shadow-lg border-b-4 border-orange-800">
-                  <Download className="w-4 h-4" /> Exportar Planilha
+                  <Download className="w-4 h-4" /> Baixar Planilha (XLSX)
                 </button>
               </div>
               <div className="bg-white rounded-[2rem] shadow-sm border-2 border-white overflow-hidden">

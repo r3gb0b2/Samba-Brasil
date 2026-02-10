@@ -5,6 +5,19 @@ import App from './App';
 
 console.log("🚀 Samba Brasil App inicializando...");
 
+// Lógica de redirecionamento para caminhos amigáveis (Ex: /sambabrasil -> /#/sambabrasil)
+// Isso ajuda quando o servidor está configurado para servir o index.html em subdiretórios
+const handlePathRedirect = () => {
+  const path = window.location.pathname;
+  if (path !== '/' && path !== '/index.html' && !window.location.hash) {
+    console.log(`🔄 Redirecionando path "${path}" para o sistema de rotas interno...`);
+    // Preserva o path original dentro do hash para o HashRouter processar
+    window.location.replace(`${window.location.origin}/#${path}`);
+  }
+};
+
+handlePathRedirect();
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
